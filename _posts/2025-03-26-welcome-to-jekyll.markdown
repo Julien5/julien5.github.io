@@ -1,10 +1,10 @@
 ---
 layout: post
-title:  "Minesweeper"
+title:  "Hello"
 date:   2025-03-26 20:15:26 +0100
 categories: rust 
 ---
-This my first post.
+This my first post. I hope it will not be too boring.
 {% highlight rust %}
 fn _2d(index:usize,n:usize) -> (usize,usize) {
 	assert!(index<(n*n));
