@@ -35,9 +35,7 @@ neighbors:
 .....
 .....
 ```
-My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (It took me much more than one hour to do that.) The minesweeper board is implemented with a vector of size 
-
-$$ N=n^2 $$
+My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (It took me much more than one hour to do that.) The minesweeper board is implemented with a vector of size $$ N=n^2 $$.
 
 {% highlight rust %}
 let N = n*n;
