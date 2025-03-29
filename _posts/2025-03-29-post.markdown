@@ -1,0 +1,48 @@
+---
+layout: post
+title:  "Minesweeper (1)"
+date:   2025-03-29 08:28:19 +0100
+categories: rust 
+---
+
+So, minesweeper, interview problem at my job.
+The problem is given as follows:
+
+```
+Minesweeper C/C++ exercise
+1. Generate a NxN Minesweeper-Board with B bombs positioned randomly.
+   The parameters N and B are passed as command line arguments.
+   N and B are positive integers, B is less than NxN.
+  
+2. For each position, display the number of bombs in the neighborhood.
+
+Limited Time: 60 minutes.
+Clarity and readability of the code will be evaluated first, correctness second.
+
+Example:
+$ ./minesweeper 5 2
+board:
+.*...
+..*..
+.....
+.....
+.....
+
+neighbors:
+1*21.
+12*1.
+.111.
+.....
+.....
+```
+My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (It took me much more than one hour to do that.) The minesweeper board is implemented with a vector of size 
+
+$$ N=n^2 $$
+
+{% highlight rust %}
+let N = n*n;
+let mut grid : Vec<usize> = vec![zero; N];
+{% endhighlight %}
+
+[test](https://github.com/julien5)
+
