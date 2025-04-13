@@ -35,12 +35,39 @@ neighbors:
 .....
 .....
 ```
-My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (It took me much more than one hour to do that.) The minesweeper board is implemented with a vector of size $$ N=n^2 $$.
-
+Nothing very exciting about this exercise. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (It took me much more than one hour to do that) The minesweeper board is implemented with a vector of size $$ N=n^2 $$. 
 {% highlight rust %}
-let N = n*n;
-let mut grid : Vec<usize> = vec![zero; N];
+	let N = n*n;
+	let mut grid : Vec<usize> = vec![ZERO; N];
+	let Bx = distinct_random_numbers(N,b);
+	for p in &Bx {
+		grid[*p]=BOMB;
+	}
 {% endhighlight %}
 
-[test](https://github.com/julien5)
+Generating random bomb positions is easy. Generating *distinct* random bomb positions is a bit more involved, but there is a trick called `shuffle`:
+{% highlight rust %}
+fn distinct_random_numbers(N:usize,b:usize) -> Vec<usize> {
+	let mut G : Vec<usize>=(0usize..N).collect();
+	let mut rng = rng();
+	// shuffle it and keep the first b elements.
+	G.shuffle(&mut rng);
+	G.truncate(b);
+	G
+}
+{% endhighlight %}
 
+For printing, i did not stick to the 
+{% highlight rust %}
+fn print_grid(grid:&[usize]) {
+	let print_lookup: [char;11] = [' ','1','2','3','4','5','6','7','8','B',' '];
+	// ...
+	for k1 in 0..n {
+		for k2 in 0..n {
+			let k=from_2d((k1,k2),n);
+			print!("| {} ",print_lookup[grid[k]]);
+		}
+		println!("|");
+	}
+}
+{% endhighlight %}
