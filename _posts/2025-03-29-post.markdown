@@ -40,7 +40,7 @@ My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e0
 ## Generating the bombs
 
 The first idea that comes to mind is the generate random numbers until we have $$B$$ distinct numbers, like this
-{% highlight rust %}
+```
 		let mut rng = StdRng::from_os_rng();
 		let B=10;
 		let N=10;
@@ -48,9 +48,66 @@ The first idea that comes to mind is the generate random numbers until we have $
 		while set.len() != B {
 			set.insert(rng.random_range(0..N*N));
 		}
-{% endhighlight %}
+```
 It most cases it works. This could be problematic if there are many bombs (think of the extreme case $$B=N^2$$), but if $$ B>\frac{N^2}{2} $$ we can invert the logic and generate bomb-free positions instead of bomb positions. Privileging [time](https://en.wikipedia.org/wiki/Time_complexity) over [space](https://en.wikipedia.org/wiki/Space_complexity) complexity, I choose the [FisherYates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle) which make $$B$$ *distincts* random numbers out of any $$B$$ random numbers, distincts or not. It has $$O(N^2)$$ space complexity (memory requirement). 
 
+## Counting the bombs
+
+Assuming $$B<\frac{N^2}{2}$$, it is faster to run across bomb positions than to run over all no-bomb positions:
+```
+	let Bx = distinct_random_numbers(n*n,b);
+	for p in &Bx {
+		grid[*p]=BOMB;
+		increment_neighboors(&mut grid,n,*p);
+	}
+```
+In out first approach, the grid has length $$N^2$$, and we must take care of the edges when iterating over the neighbors positions. This makes quite many `if`s.
+```
+fn increment_neighboors(grid:&mut [usize], nu:usize, pos:usize) {
+	// ...
+	for dx in [-1,0,1] {
+		let posnx=posx+dx;
+		if posnx<0 || posnx>=n {
+			continue;
+		}
+		for dy in [-1,0,1] {
+			if dx == 0 && dy == 0 {
+				continue
+			}
+			let posny=posy+dy;
+			if posny<0 || posny>=n {
+				continue;
+			}
+			// ...
+			// increment the neighboors count
+			if grid[lu] != BOMB {
+				grid[lu]+=1;
+			}
+		}
+	}
+}
+```
+This quite many `if`s is not very nice. Because of this, and because we want to parallelize, it makes sense to add "margins" to our grid, which gets length $$(N+2)^2$$. 
+
+## Multithreading 
+
+We want to avoid using mutexes as much as possible. The idea is very simple: divide the large minesweeper grids into many small tiles (subgrids). Each tile as its margin, so that we dont loose neighbors for the bomb on the tile edges. When the tiles are merged together for printing, we must take properly care of those edges. This resulting algorithm is as follows:
+1. Determine $$K$$, the number of subgrids. (This could be defined by the user.)
+2. For each subgrid, generate a chunk of (an array of) $$B/K$$ bomb positions.
+3. For each bomb chunk, generate the tile, placing the bombs and counting the neighbors.
+
+Using [rayon](https://docs.rs/rayon/latest/rayon/), the resulting code looks like this:
+```
+let indexes:Vec<usize>=(0..K).collect();
+let _:Vec<()>=indexes.into_par_iter()
+	.map(|index| BombChunk::with_bomb_count(X,Y,index,Bchunk)).into_par_iter()
+	.map(|chunk| make_tile(chunk)).into_par_iter()
+	.map(|tile| acc0.lock().unwrap().aggregate(tile))
+	.collect();
+```
+
+**Note**: 
+Generating bomb per tile has a "statistical" cost: the probability of the bomb distribution is not uniform over the large grid anymore. For example the probability of any chunk to have more (or less) than $$B/K$$ bombs is zero. At this price we reduce the space complexity.
 
 
 

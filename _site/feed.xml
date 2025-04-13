@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-13T11:32:05+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">Hello</title><link href="http://localhost:4000/rust/2025/03/31/post.html" rel="alternate" type="text/html" title="Hello" /><published>2025-03-31T07:34:26+02:00</published><updated>2025-03-31T07:34:26+02:00</updated><id>http://localhost:4000/rust/2025/03/31/post</id><content type="html" xml:base="http://localhost:4000/rust/2025/03/31/post.html"><![CDATA[<p>This my first post. I hope it will not be too boring.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-13T12:04:38+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">Hello</title><link href="http://localhost:4000/rust/2025/03/31/post.html" rel="alternate" type="text/html" title="Hello" /><published>2025-03-31T07:34:26+02:00</published><updated>2025-03-31T07:34:26+02:00</updated><id>http://localhost:4000/rust/2025/03/31/post</id><content type="html" xml:base="http://localhost:4000/rust/2025/03/31/post.html"><![CDATA[<p>This my first post. I hope it will not be too boring.</p>
 
 <figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">_2d</span><span class="p">(</span><span class="n">index</span><span class="p">:</span><span class="nb">usize</span><span class="p">,</span><span class="n">n</span><span class="p">:</span><span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="p">(</span><span class="nb">usize</span><span class="p">,</span><span class="nb">usize</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nd">assert!</span><span class="p">(</span><span class="n">index</span><span class="o">&lt;</span><span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="n">n</span><span class="p">));</span>
@@ -41,16 +41,72 @@ neighbors:
 <h2 id="generating-the-bombs">Generating the bombs</h2>
 
 <p>The first idea that comes to mind is the generate random numbers until we have \(B\) distinct numbers, like this</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>		let mut rng = StdRng::from_os_rng();
+		let B=10;
+		let N=10;
+		let mut set=std::collections::HashSet::new();
+		while set.len() != B {
+			set.insert(rng.random_range(0..N*N));
+		}
+</code></pre></div></div>
+<p>It most cases it works. This could be problematic if there are many bombs (think of the extreme case \(B=N^2\)), but if \(B&gt;\frac{N^2}{2}\) we can invert the logic and generate bomb-free positions instead of bomb positions. Privileging <a href="https://en.wikipedia.org/wiki/Time_complexity">time</a> over <a href="https://en.wikipedia.org/wiki/Space_complexity">space</a> complexity, I choose the <a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">FisherYates shuffle</a> which make \(B\) <em>distincts</em> random numbers out of any \(B\) random numbers, distincts or not. It has \(O(N^2)\) space complexity (memory requirement).</p>
 
-<figure class="highlight"><pre><code class="language-rust" data-lang="rust">		<span class="k">let</span> <span class="k">mut</span> <span class="n">rng</span> <span class="o">=</span> <span class="nn">StdRng</span><span class="p">::</span><span class="nf">from_os_rng</span><span class="p">();</span>
-		<span class="k">let</span> <span class="n">B</span><span class="o">=</span><span class="mi">10</span><span class="p">;</span>
-		<span class="k">let</span> <span class="n">N</span><span class="o">=</span><span class="mi">10</span><span class="p">;</span>
-		<span class="k">let</span> <span class="k">mut</span> <span class="n">set</span><span class="o">=</span><span class="nn">std</span><span class="p">::</span><span class="nn">collections</span><span class="p">::</span><span class="nn">HashSet</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
-		<span class="k">while</span> <span class="n">set</span><span class="nf">.len</span><span class="p">()</span> <span class="o">!=</span> <span class="n">B</span> <span class="p">{</span>
-			<span class="n">set</span><span class="nf">.insert</span><span class="p">(</span><span class="n">rng</span><span class="nf">.random_range</span><span class="p">(</span><span class="mi">0</span><span class="o">..</span><span class="n">N</span><span class="o">*</span><span class="n">N</span><span class="p">));</span>
-		<span class="p">}</span></code></pre></figure>
+<h2 id="counting-the-bombs">Counting the bombs</h2>
 
-<p>It most cases it works. This could be problematic if there are many bombs (think of the extreme case \(B=N^2\)), but if \(B&gt;\frac{N^2}{2}\) we can invert the logic and generate bomb-free positions instead of bomb positions. Privileging <a href="https://en.wikipedia.org/wiki/Time_complexity">time</a> over <a href="https://en.wikipedia.org/wiki/Space_complexity">space</a> complexity, I choose the <a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">FisherYates shuffle</a> which make \(B\) <em>distincts</em> random numbers out of any \(B\) random numbers, distincts or not. It has \(O(N^2)\) space complexity (memory requirement).</p>]]></content><author><name></name></author><category term="rust" /><summary type="html"><![CDATA[So, minesweeper, interview problem at my job. The problem is given as follows:]]></summary></entry><entry><title type="html">Hello</title><link href="http://localhost:4000/rust/2025/03/26/welcome-to-jekyll.html" rel="alternate" type="text/html" title="Hello" /><published>2025-03-26T20:15:26+01:00</published><updated>2025-03-26T20:15:26+01:00</updated><id>http://localhost:4000/rust/2025/03/26/welcome-to-jekyll</id><content type="html" xml:base="http://localhost:4000/rust/2025/03/26/welcome-to-jekyll.html"><![CDATA[<p>This my first post. I hope it will not be too boring.</p>
+<p>Assuming \(B&lt;\frac{N^2}{2}\), it is faster to run across bomb positions than to run over all no-bomb positions:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	let Bx = distinct_random_numbers(n*n,b);
+	for p in &amp;Bx {
+		grid[*p]=BOMB;
+		increment_neighboors(&amp;mut grid,n,*p);
+	}
+</code></pre></div></div>
+<p>In out first approach, the grid has length \(N^2\), and we must take care of the edges when iterating over the neighbors positions. This makes quite many <code class="language-plaintext highlighter-rouge">if</code>s.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fn increment_neighboors(grid:&amp;mut [usize], nu:usize, pos:usize) {
+	// ...
+	for dx in [-1,0,1] {
+		let posnx=posx+dx;
+		if posnx&lt;0 || posnx&gt;=n {
+			continue;
+		}
+		for dy in [-1,0,1] {
+			if dx == 0 &amp;&amp; dy == 0 {
+				continue
+			}
+			let posny=posy+dy;
+			if posny&lt;0 || posny&gt;=n {
+				continue;
+			}
+			// ...
+			// increment the neighboors count
+			if grid[lu] != BOMB {
+				grid[lu]+=1;
+			}
+		}
+	}
+}
+</code></pre></div></div>
+<p>This quite many <code class="language-plaintext highlighter-rouge">if</code>s is not very nice. Because of this, and because we want to parallelize, it makes sense to add “margins” to our grid, which gets length \((N+2)^2\).</p>
+
+<h2 id="multithreading">Multithreading</h2>
+
+<p>We want to avoid using mutexes as much as possible. The idea is very simple: divide the large minesweeper grids into many small tiles (subgrids). Each tile as its margin, so that we dont loose neighbors for the bomb on the tile edges. When the tiles are merged together for printing, we must take properly care of those edges. This resulting algorithm is as follows:</p>
+<ol>
+  <li>Determine \(K\), the number of subgrids. (This could be defined by the user.)</li>
+  <li>For each subgrid, generate a chunk of (an array of) \(B/K\) bomb positions.</li>
+  <li>For each bomb chunk, generate the tile, placing the bombs and counting the neighbors.</li>
+</ol>
+
+<p>Using <a href="https://docs.rs/rayon/latest/rayon/">rayon</a>, the resulting code looks like this:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let indexes:Vec&lt;usize&gt;=(0..K).collect();
+let _:Vec&lt;()&gt;=indexes.into_par_iter()
+	.map(|index| BombChunk::with_bomb_count(X,Y,index,Bchunk)).into_par_iter()
+	.map(|chunk| make_tile(chunk)).into_par_iter()
+	.map(|tile| acc0.lock().unwrap().aggregate(tile))
+	.collect();
+</code></pre></div></div>
+
+<p><strong>Note</strong>: 
+Generating bomb per tile has a “statistical” cost: the probability of the bomb distribution is not uniform over the large grid anymore. For example the probability of any chunk to have more (or less) than \(B/K\) bombs is zero. At this price we reduce the space complexity.</p>]]></content><author><name></name></author><category term="rust" /><summary type="html"><![CDATA[So, minesweeper, interview problem at my job. The problem is given as follows:]]></summary></entry><entry><title type="html">Hello</title><link href="http://localhost:4000/rust/2025/03/26/welcome-to-jekyll.html" rel="alternate" type="text/html" title="Hello" /><published>2025-03-26T20:15:26+01:00</published><updated>2025-03-26T20:15:26+01:00</updated><id>http://localhost:4000/rust/2025/03/26/welcome-to-jekyll</id><content type="html" xml:base="http://localhost:4000/rust/2025/03/26/welcome-to-jekyll.html"><![CDATA[<p>This my first post. I hope it will not be too boring.</p>
 
 <figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">_2d</span><span class="p">(</span><span class="n">index</span><span class="p">:</span><span class="nb">usize</span><span class="p">,</span><span class="n">n</span><span class="p">:</span><span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="p">(</span><span class="nb">usize</span><span class="p">,</span><span class="nb">usize</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nd">assert!</span><span class="p">(</span><span class="n">index</span><span class="o">&lt;</span><span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="n">n</span><span class="p">));</span>
