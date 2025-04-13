@@ -35,39 +35,24 @@ neighbors:
 .....
 .....
 ```
-Nothing very exciting about this exercise. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (It took me much more than one hour to do that) The minesweeper board is implemented with a vector of size $$ N=n^2 $$. 
-{% highlight rust %}
-	let N = n*n;
-	let mut grid : Vec<usize> = vec![ZERO; N];
-	let Bx = distinct_random_numbers(N,b);
-	for p in &Bx {
-		grid[*p]=BOMB;
-	}
-{% endhighlight %}
+My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (It took me much more than one hour to do that). Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. 
 
-Generating random bomb positions is easy. Generating *distinct* random bomb positions is a bit more involved, but there is a trick called `shuffle`:
-{% highlight rust %}
-fn distinct_random_numbers(N:usize,b:usize) -> Vec<usize> {
-	let mut G : Vec<usize>=(0usize..N).collect();
-	let mut rng = rng();
-	// shuffle it and keep the first b elements.
-	G.shuffle(&mut rng);
-	G.truncate(b);
-	G
-}
-{% endhighlight %}
+## Generating the bombs
 
-For printing, i did not stick to the 
+The first idea that comes to mind is the generate random numbers until we have $$B$$ distinct numbers, like this
 {% highlight rust %}
-fn print_grid(grid:&[usize]) {
-	let print_lookup: [char;11] = [' ','1','2','3','4','5','6','7','8','B',' '];
-	// ...
-	for k1 in 0..n {
-		for k2 in 0..n {
-			let k=from_2d((k1,k2),n);
-			print!("| {} ",print_lookup[grid[k]]);
+		let mut rng = StdRng::from_os_rng();
+		let B=10;
+		let N=10;
+		let mut set=std::collections::HashSet::new();
+		while set.len() != B {
+			set.insert(rng.random_range(0..N*N));
 		}
-		println!("|");
-	}
-}
 {% endhighlight %}
+It most cases it works. This could be problematic if there are many bombs (think of the extreme case $$B=N^2$$), but if $$ B>\frac{N^2}{2} $$ we can invert the logic and generate bomb-free positions instead of bomb positions. Privileging [time](https://en.wikipedia.org/wiki/Time_complexity) over [space](https://en.wikipedia.org/wiki/Space_complexity) complexity, I choose the [FisherYates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle) which make $$B$$ *distincts* random numbers out of any $$B$$ random numbers, distincts or not. It has $$O(N^2)$$ space complexity (memory requirement). 
+
+
+
+
+
+
