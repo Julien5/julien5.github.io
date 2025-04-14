@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-14T16:30:27+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">Hello</title><link href="http://localhost:4000/rust/2025/03/31/post.html" rel="alternate" type="text/html" title="Hello" /><published>2025-03-31T07:34:26+02:00</published><updated>2025-03-31T07:34:26+02:00</updated><id>http://localhost:4000/rust/2025/03/31/post</id><content type="html" xml:base="http://localhost:4000/rust/2025/03/31/post.html"><![CDATA[<p>This my first post. I hope it will not be too boring.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-14T18:23:41+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">Hello</title><link href="http://localhost:4000/rust/2025/03/31/post.html" rel="alternate" type="text/html" title="Hello" /><published>2025-03-31T07:34:26+02:00</published><updated>2025-03-31T07:34:26+02:00</updated><id>http://localhost:4000/rust/2025/03/31/post</id><content type="html" xml:base="http://localhost:4000/rust/2025/03/31/post.html"><![CDATA[<p>This my first post. I hope it will not be too boring.</p>
 
 <figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">_2d</span><span class="p">(</span><span class="n">index</span><span class="p">:</span><span class="nb">usize</span><span class="p">,</span><span class="n">n</span><span class="p">:</span><span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="p">(</span><span class="nb">usize</span><span class="p">,</span><span class="nb">usize</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nd">assert!</span><span class="p">(</span><span class="n">index</span><span class="o">&lt;</span><span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="n">n</span><span class="p">));</span>
@@ -7,7 +7,7 @@
 	<span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
 <span class="p">}</span></code></pre></figure>
 
-<p><a href="https://github.com/julien5">test</a></p>]]></content><author><name></name></author><category term="rust" /><summary type="html"><![CDATA[This my first post. I hope it will not be too boring. fn _2d(index:usize,n:usize) -&gt; (usize,usize) { assert!(index&lt;(n*n)); let x=index%n; let y=index/n; (x,y) }]]></summary></entry><entry><title type="html">Minesweeper (1)</title><link href="http://localhost:4000/minesweeper/2025/03/29/post.html" rel="alternate" type="text/html" title="Minesweeper (1)" /><published>2025-03-29T08:28:19+01:00</published><updated>2025-03-29T08:28:19+01:00</updated><id>http://localhost:4000/minesweeper/2025/03/29/post</id><content type="html" xml:base="http://localhost:4000/minesweeper/2025/03/29/post.html"><![CDATA[<p>So, minesweeper, interview coding problem:</p>
+<p><a href="https://github.com/julien5">test</a></p>]]></content><author><name></name></author><category term="rust" /><summary type="html"><![CDATA[This my first post. I hope it will not be too boring. fn _2d(index:usize,n:usize) -&gt; (usize,usize) { assert!(index&lt;(n*n)); let x=index%n; let y=index/n; (x,y) }]]></summary></entry><entry><title type="html">Minesweeper</title><link href="http://localhost:4000/minesweeper/2025/03/29/post.html" rel="alternate" type="text/html" title="Minesweeper" /><published>2025-03-29T08:28:19+01:00</published><updated>2025-03-29T08:28:19+01:00</updated><id>http://localhost:4000/minesweeper/2025/03/29/post</id><content type="html" xml:base="http://localhost:4000/minesweeper/2025/03/29/post.html"><![CDATA[<p>So, minesweeper, interview coding problem:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Minesweeper C/C++ exercise
 1. Generate a NxN's Minesweeper grid with B bombs positioned randomly.
    The parameters N and B are passed as command line arguments.
@@ -38,9 +38,9 @@ $ ./minesweeper 5 2
 
 <p>Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. And since I and some coworkers had worked out several solutions in C/C++, i was curious to see how rust compares to them.</p>
 
-<h2 id="the-grid">The Grid</h2>
+<h2 id="baseline">Baseline</h2>
 
-<p>The fastest implementations use an array of <code class="language-plaintext highlighter-rouge">usize</code> elements with length $NxN$. The reason for <code class="language-plaintext highlighter-rouge">usize</code> is the lookup performed in <a href="#printing-the-grid"><code class="language-plaintext highlighter-rouge">print_grid</code></a>. (In later versions, i changed to Vec<u8>.) The element type `usize` is too large, in fact.</u8></p>
+<p>The fastest C++ implementation use and so do i. The baseline rust version has an array of <code class="language-plaintext highlighter-rouge">usize</code> elements with length $NxN$. The reason for <code class="language-plaintext highlighter-rouge">usize</code> is the lookup performed in <a href="#printing-the-grid"><code class="language-plaintext highlighter-rouge">print_grid</code></a>. The element type <code class="language-plaintext highlighter-rouge">usize</code> is too large, in fact. (In later versions, i changed to Vec<u8>.)</u8></p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const BOMB  : usize = 9;
 const ZERO  : usize = 0;
 
@@ -58,7 +58,7 @@ pub fn main(N : usize, B: usize, quiet: bool) {
 }
 </code></pre></div></div>
 
-<h2 id="generating-the-bombs">Generating the bombs</h2>
+<h3 id="generating-the-bombs">Generating the bombs</h3>
 
 <p>For the \(B\) randomly positioned bombs, the first idea that comes to mind is to generate random numbers until we have \(B\) distinct numbers, like this</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>		let mut set=std::collections::HashSet::new();
@@ -88,7 +88,7 @@ pub fn distinct_random_numbers(mut positions: Vec&lt;usize&gt;, b:usize) -&gt; V
 }
 </code></pre></div></div>
 
-<h2 id="counting-the-bombs">Counting the bombs</h2>
+<h3 id="counting-the-bombs">Counting the bombs</h3>
 
 <p>Assuming \(B&lt;\frac{N^2}{2}\), it is faster to run across bomb positions than to run over all bomb-free positions:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pub fn main(n : usize, b: usize, quiet: bool) {
@@ -126,7 +126,7 @@ pub fn distinct_random_numbers(mut positions: Vec&lt;usize&gt;, b:usize) -&gt; V
 </code></pre></div></div>
 <p>This quite many <code class="language-plaintext highlighter-rouge">if</code>s is not very nice.</p>
 
-<h2 id="printing-the-grid">Printing the grid</h2>
+<h3 id="printing-the-grid">Printing the grid</h3>
 
 <p>Printing using <code class="language-plaintext highlighter-rouge">print!</code> or <code class="language-plaintext highlighter-rouge">println!</code> is <a href="https://users.rust-lang.org/t/efficiency-of-println-and-format/52772">slow</a>. It is much faster to write bytes directly to stdout, line by line:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fn print_grid(grid:&amp;[usize], n:usize, printer : &amp;mut utils::Printer, show_count:bool) {
@@ -148,7 +148,7 @@ pub fn distinct_random_numbers(mut positions: Vec&lt;usize&gt;, b:usize) -&gt; V
 	}
 }
 </code></pre></div></div>
-<p>I could not help to make the output more readable with “|” as separators:</p>
+<p>I could not help to make the output more readable with “|” as separators, even if that is a bit slower:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[julien@Z230] minesweeper $ cargo run -- baseline verbose 4 4
 [...]
 |   | * |   |   |
@@ -162,7 +162,7 @@ pub fn distinct_random_numbers(mut positions: Vec&lt;usize&gt;, b:usize) -&gt; V
 | 1 | * | 2 | 1 |
 </code></pre></div></div>
 
-<h2 id="going-parallel">Going parallel</h2>
+<h2 id="going-parallel">Going Parallel</h2>
 
 <p>We want to avoid using mutexes as much as possible. The idea is very simple: divide the large minesweeper grids into many small rectangular tiles (subgrids) of size \((X+2)x(Y+2)\) where \(X=N\) and \(Y=N/K\). Each tile has its margin (hence <code class="language-plaintext highlighter-rouge">X+2</code> and <code class="language-plaintext highlighter-rouge">Y+2</code>), so that we dont loose neighbors for the bomb on the tile edges.</p>
 
@@ -179,7 +179,7 @@ pub fn distinct_random_numbers(mut positions: Vec&lt;usize&gt;, b:usize) -&gt; V
   </tbody>
 </table>
 
-<p>When the tiles are merged together for printing, we must take properly care of those edges. This resulting algorithm is as follows:</p>
+<p>When the tiles are merged together for printing, we must take properly care of those edges (this is the <code class="language-plaintext highlighter-rouge">merge</code> function in <a href="https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/tile.rs">tile.rs</a>). This resulting algorithm is as follows:</p>
 <ol>
   <li>Determine \(K\), the number of tiles. (This could be defined by the user.)</li>
   <li>For each k in \({0,...,K-1}\):
@@ -226,9 +226,87 @@ Step 3 could be done in parallel, but not with <a href="https://docs.rs/rayon/la
 
 <h2 id="performance">Performance</h2>
 
-<p><img src="/assets/minesweeper/time-chunks.png" alt="K" />
-<img src="/assets/minesweeper/time-array-2.png" alt="L" />
-<img src="/assets/minesweeper/time-array-8.png" alt="L" /></p>
+<h3 id="baseline-against-parallel">Baseline against Parallel</h3>
+
+<p>First we check that the parallel version with one chunk (K=1, i.e. one tile, one thread, no parallelism) is <em>not</em> slower than the baseline.</p>
+
+<p>For our experiments with use large grids. The size \(N\) is set with a parameter L:</p>
+
+\[N=1024*L\]
+
+<p>and we let L varying. The number of bombs \(B\) is set with a parameter D:</p>
+
+\[B=N^2/D\]
+
+<p>and we vary D from 2 (many bombs) to larger values.
+Here are the timings I get on my debian box with a i7-4470 CPU and 32Gb RAM.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>L</th>
+      <th>D</th>
+      <th>baseline (time in s)</th>
+      <th>parallel (time in s)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>4</td>
+      <td>2</td>
+      <td>1.35</td>
+      <td>1.16</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>2</td>
+      <td>5.65</td>
+      <td>5.00</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>2</td>
+      <td>9.09</td>
+      <td>7.81</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>It is not only <em>not</em> slower, it is a little faster. This is because with parallel version has margins and does not need to check boundaries: faster code with less branches. I checked that the baseline get similar timing to the parallel algorithm by manipulating it. If no bombs is on the grid edges and the bound checking is removed, the timings are similar.</p>
+
+<h3 id="concurrency-speed-gain">Concurrency Speed Gain</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><img src="/assets/minesweeper/time-chunks.png" alt="tile" /></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">\(L=8\), \(D=2\)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Well, this is faster with more chunks :)</p>
+
+<h3 id="comparison-with-cc">Comparison with C/C++</h3>
+
+<p>The C++ implementation has margins and only one tile (K=1). So we set K=1 in the parallel version.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><img src="/assets/minesweeper/time-array-2.png" alt="tile" /></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">Time as a function of N</td>
+    </tr>
+  </tbody>
+</table>
 
 <h2 id="notes">Notes</h2>
 
