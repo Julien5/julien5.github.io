@@ -35,25 +35,22 @@ neighbors:
 .....
 .....
 ```
-My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (It took me much more than one hour to do that). Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. 
+So, this is just about generating a $$NxN$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is not about programming the game or solving it. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (It took me much more than one hour to do that). Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. 
 
 ## Generating the bombs
 
-The first idea that comes to mind is the generate random numbers until we have $$B$$ distinct numbers, like this
+For the $$B$$ randomly positioned bombs, the first idea that comes to mind is the generate random numbers until we have $$B$$ distinct numbers, like this
 ```
-		let mut rng = StdRng::from_os_rng();
-		let B=10;
-		let N=10;
 		let mut set=std::collections::HashSet::new();
 		while set.len() != B {
 			set.insert(rng.random_range(0..N*N));
 		}
 ```
-It most cases it works. This could be problematic if there are many bombs (think of the extreme case $$B=N^2$$), but if $$ B>\frac{N^2}{2} $$ we can invert the logic and generate bomb-free positions instead of bomb positions. Privileging [time](https://en.wikipedia.org/wiki/Time_complexity) over [space](https://en.wikipedia.org/wiki/Space_complexity) complexity, I choose the [FisherYates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle) which make $$B$$ *distincts* random numbers out of any $$B$$ random numbers, distincts or not. It has $$O(N^2)$$ space complexity (memory requirement). 
+It works, but it make last long if there are many bombs ($$B$$ close to $$N^2$$.. think of the extreme case where the grid is full of bombs). (There is a trick: if $$ B>\frac{N^2}{2} $$ we can invert the logic and generate bomb-free positions instead of bomb positions.) I wanted a fast, deterministic algorithm, privileging [time](https://en.wikipedia.org/wiki/Time_complexity) over [space](https://en.wikipedia.org/wiki/Space_complexity) complexity, I choose the [FisherYates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle) which make $$B$$ *distincts* random numbers out of any $$B$$ random numbers, distincts or not. It has $$O(N^2)$$ space complexity (memory requirement). 
 
 ## Counting the bombs
 
-Assuming $$B<\frac{N^2}{2}$$, it is faster to run across bomb positions than to run over all no-bomb positions:
+Assuming $$B<\frac{N^2}{2}$$, it is faster to run across bomb positions than to run over all bomb-free positions:
 ```
 	let Bx = distinct_random_numbers(n*n,b);
 	for p in &Bx {
@@ -61,7 +58,7 @@ Assuming $$B<\frac{N^2}{2}$$, it is faster to run across bomb positions than to 
 		increment_neighboors(&mut grid,n,*p);
 	}
 ```
-In out first approach, the grid has length $$N^2$$, and we must take care of the edges when iterating over the neighbors positions. This makes quite many `if`s.
+In our first approach, the grid has length $$NxN$$, and we must take care of the edges when iterating over the neighbors positions. This makes quite many `if`s.
 ```
 fn increment_neighboors(grid:&mut [usize], nu:usize, pos:usize) {
 	// ...
@@ -87,29 +84,62 @@ fn increment_neighboors(grid:&mut [usize], nu:usize, pos:usize) {
 	}
 }
 ```
-This quite many `if`s is not very nice. Because of this, and because we want to parallelize, it makes sense to add "margins" to our grid, which gets length $$(N+2)^2$$. 
+This quite many `if`s is not very nice. Because of this, and because we want to parallelize, it makes sense to add "margins" to our grid, which gets length $$(N+2)x(N+2)$$. 
+
+## Printing the grid
 
 ## Multithreading 
 
-We want to avoid using mutexes as much as possible. The idea is very simple: divide the large minesweeper grids into many small tiles (subgrids). Each tile as its margin, so that we dont loose neighbors for the bomb on the tile edges. When the tiles are merged together for printing, we must take properly care of those edges. This resulting algorithm is as follows:
+We want to avoid using mutexes as much as possible. The idea is very simple: divide the large minesweeper grids into many small tiles (subgrids) of size $$(X+2)x(Y+2)$$ where $$X=N$$ and $$Y=N/K$$. Each tile as its margin, so that we dont loose neighbors for the bomb on the tile edges. When the tiles are merged together for printing, we must take properly care of those edges. This resulting algorithm is as follows:
 1. Determine $$K$$, the number of subgrids. (This could be defined by the user.)
 2. For each subgrid, generate a chunk of (an array of) $$B/K$$ bomb positions.
 3. For each bomb chunk, generate the tile, placing the bombs and counting the neighbors.
+4. Aggregate the tiles together and fix the counts on the tile edges.
 
-Using [rayon](https://docs.rs/rayon/latest/rayon/), the resulting code looks like this:
+Implementation with explicit for loops:
 ```
-let indexes:Vec<usize>=(0..K).collect();
-let _:Vec<()>=indexes.into_par_iter()
-	.map(|index| BombChunk::with_bomb_count(X,Y,index,Bchunk)).into_par_iter()
-	.map(|chunk| make_tile(chunk)).into_par_iter()
-	.map(|tile| acc0.lock().unwrap().aggregate(tile))
-	.collect();
+fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
+	let mut tiles=Vec::new();
+	for index in 0..K {
+		let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
+		tiles.push(make_tile(chunk));
+	}
+	let mut acc=TileAccumulator::init();
+	for tile in tiles {
+		acc.aggregate(tile);
+	}
+	let mut printer=make_printer(quiet);
+	acc.print_bombs();
+	acc.print_counts();
+}
+```
+
+Reformulated with iterators and [`map`](https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.map):
+```
+fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
+	let mut acc=TileAccumulator::init();
+	let _:Vec<()>=(0..K).into_iter()
+		.map(|index| BombChunk::with_bomb_count(X,Y,index,Bchunk)).into_iter()
+		.map(|chunk| make_tile(chunk)).into_iter()
+		.map(|tile| acc.aggregate(tile)).collect();
+	acc.print_bombs();
+	acc.print_counts();
+}
+```
+
+And now just replaced iterator with [parallel iterators](https://docs.rs/rayon/latest/rayon/iter/index.html):
+```
+fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
+	let _:Vec<()>=indexes.into_par_iter()
+		.map(|index| BombChunk::with_bomb_count(X,Y,index,Bchunk)).into_par_iter()
+		.map(|chunk| make_tile(chunk)).into_par_iter()
+		.map(|tile| acc0.lock().unwrap().aggregate(tile))
+		.collect();
+	acc.print_bombs();
+	acc.print_counts();
+}
 ```
 
 **Note**: 
 Generating bomb per tile has a "statistical" cost: the probability of the bomb distribution is not uniform over the large grid anymore. For example the probability of any chunk to have more (or less) than $$B/K$$ bombs is zero. At this price we reduce the space complexity.
-
-
-
-
 
