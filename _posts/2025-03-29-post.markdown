@@ -153,7 +153,7 @@ fn print_grid(grid:&[usize], n:usize, printer : &mut utils::Printer, show_count:
 	}
 }
 ```
-I could not help to make the output more readable with "|" as separators:
+I could not help to make the output more readable with "|" as separators, even if that is a bit slower:
 ```
 [julien@Z230] minesweeper $ cargo run -- baseline verbose 4 4
 [...]
@@ -177,7 +177,7 @@ We want to avoid using mutexes as much as possible. The idea is very simple: div
 | Tiles for N=6,K=3 => X=6, Y=2          |
 
 
-When the tiles are merged together for printing, we must take properly care of those edges. This resulting algorithm is as follows:
+When the tiles are merged together for printing, we must take properly care of those edges (this is the `merge` function in [tile.rs](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/tile.rs)). This resulting algorithm is as follows:
 1. Determine $$K$$, the number of tiles. (This could be defined by the user.)
 2. For each k in $${0,...,K-1}$$:
    - generate a chunk of $$B/K$$ bomb positions.
