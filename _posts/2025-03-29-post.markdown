@@ -5,8 +5,7 @@ date:   2025-03-29 08:28:19 +0100
 categories: rust
 ---
 
-So, minesweeper, interview problem at my job.
-
+So, minesweeper, interview problem at my job:
 ```
 Minesweeper C/C++ exercise
 1. Generate a NxN Minesweeper-Board with B bombs positioned randomly.
@@ -34,18 +33,19 @@ neighbors:
 .....
 .....
 ```
-So, this is just about generating a $$NxN$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is not about programming the game or solving it. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (It took me much more than one hour to do that). Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. 
+
+So, this is just about generating a $$NxN$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is not about programming the game or solving it. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (Starting with rust, it took me much more than one hour to get the first working version). Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. 
 
 ## Generating the bombs
 
-For the $$B$$ randomly positioned bombs, the first idea that comes to mind is the generate random numbers until we have $$B$$ distinct numbers, like this
+For the $$B$$ randomly positioned bombs, the first idea that comes to mind is to generate random numbers until we have $$B$$ distinct numbers, like this
 ```
 		let mut set=std::collections::HashSet::new();
 		while set.len() != B {
 			set.insert(rng.random_range(0..N*N));
 		}
 ```
-It works, but it make last long if there are many bombs ($$B$$ close to $$N^2$$.. think of the extreme case where the grid is full of bombs). (There is a trick: if $$ B>\frac{N^2}{2} $$ we can invert the logic and generate bomb-free positions instead of bomb positions.) I wanted a fast, deterministic algorithm, privileging [time](https://en.wikipedia.org/wiki/Time_complexity) over [space](https://en.wikipedia.org/wiki/Space_complexity) complexity, I choose the [FisherYates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle) which make $$B$$ *distincts* random numbers out of any $$B$$ random numbers, distincts or not. It has $$O(N^2)$$ space complexity (memory requirement).
+It works, but it may be slow if $$B$$ is large (close to $$N^2$.. think of the extreme case where the grid is full of bombs). (There is a trick: if $$B>\frac{N^2}{2}$$ we can invert the logic and generate the bomb-free positions instead of bomb positions.) I wanted a fast, deterministic algorithm, privileging [time](https://en.wikipedia.org/wiki/Time_complexity) over [space](https://en.wikipedia.org/wiki/Space_complexity) complexity, I choose the [FisherYates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle) which make $$B$$ *distincts* random numbers out of any $$B$$ random numbers, distincts or not. It has $$O(N^2)$$ space complexity (memory requirement).
 
 ```
 /// The position arguments is a vector with all possible positions,
@@ -78,7 +78,8 @@ Assuming $$B<\frac{N^2}{2}$$, it is faster to run across bomb positions than to 
 		increment_neighboors(&mut grid,n,*p);
 	}
 ```
-In our first approach, the grid has length $$NxN$$, and we must take care of the edges when iterating over the neighbors positions. This makes quite many `if`s.
+In our first approach, the grid has length $$NxN$$, and we must take care of the edges when iterating over the neighbors positions. 
+This makes quite many `if`s.
 ```
 fn increment_neighboors(grid:&mut [usize], nu:usize, pos:usize) {
 	// ...
@@ -108,7 +109,7 @@ This quite many `if`s is not very nice.
 
 ## Printing the grid
 
-Printing using `print!` or `println!` is [slow](https://users.rust-lang.org/t/efficiency-of-println-and-format/52772). It is much faster to write bytes directly to stdout, with a lookup for 
+Printing using `print!` or `println!` is [slow](https://users.rust-lang.org/t/efficiency-of-println-and-format/52772). It is much faster to write bytes directly to stdout:
 ```
 fn print_grid(grid:&[usize], n:usize, printer : &mut utils::Printer, show_count:bool) {
 	let print_lookup: [u8;11] = match show_count {

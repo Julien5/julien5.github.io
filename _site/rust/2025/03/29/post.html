@@ -7,8 +7,8 @@
 <meta name="generator" content="Jekyll v3.10.0" />
 <meta property="og:title" content="Minesweeper (1)" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="So, minesweeper, interview problem at my job." />
-<meta property="og:description" content="So, minesweeper, interview problem at my job." />
+<meta name="description" content="So, minesweeper, interview problem at my job: ``` Minesweeper C/C++ exercise Generate a NxN Minesweeper-Board with B bombs positioned randomly. The parameters N and B are passed as command line arguments. N and B are positive integers, B is less than NxN. For each position, display the number of bombs in the neighborhood." />
+<meta property="og:description" content="So, minesweeper, interview problem at my job: ``` Minesweeper C/C++ exercise Generate a NxN Minesweeper-Board with B bombs positioned randomly. The parameters N and B are passed as command line arguments. N and B are positive integers, B is less than NxN. For each position, display the number of bombs in the neighborhood." />
 <link rel="canonical" href="http://localhost:4000/rust/2025/03/29/post.html" />
 <meta property="og:url" content="http://localhost:4000/rust/2025/03/29/post.html" />
 <meta property="og:site_name" content="Your awesome title" />
@@ -17,7 +17,7 @@
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Minesweeper (1)" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2025-03-29T08:28:19+01:00","datePublished":"2025-03-29T08:28:19+01:00","description":"So, minesweeper, interview problem at my job.","headline":"Minesweeper (1)","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/rust/2025/03/29/post.html"},"url":"http://localhost:4000/rust/2025/03/29/post.html"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2025-03-29T08:28:19+01:00","datePublished":"2025-03-29T08:28:19+01:00","description":"So, minesweeper, interview problem at my job: ``` Minesweeper C/C++ exercise Generate a NxN Minesweeper-Board with B bombs positioned randomly. The parameters N and B are passed as command line arguments. N and B are positive integers, B is less than NxN. For each position, display the number of bombs in the neighborhood.","headline":"Minesweeper (1)","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/rust/2025/03/29/post.html"},"url":"http://localhost:4000/rust/2025/03/29/post.html"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Your awesome title" /></head>
 <body><header class="site-header" role="banner">
@@ -51,8 +51,7 @@
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p>So, minesweeper, interview problem at my job.</p>
-
+    <p>So, minesweeper, interview problem at my job:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Minesweeper C/C++ exercise
 1. Generate a NxN Minesweeper-Board with B bombs positioned randomly.
    The parameters N and B are passed as command line arguments.
@@ -79,17 +78,18 @@ neighbors:
 .....
 .....
 </code></pre></div></div>
-<p>So, this is just about generating a \(NxN\) square grid with \(B\) randomly positioned bombs and count the bombs. This is not about programming the game or solving it. My first version is <a href="https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs">here</a>. (It took me much more than one hour to do that). Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting.</p>
+
+<p>So, this is just about generating a \(NxN\) square grid with \(B\) randomly positioned bombs and count the bombs. This is not about programming the game or solving it. My first version is <a href="https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs">here</a>. (Starting with rust, it took me much more than one hour to get the first working version). Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting.</p>
 
 <h2 id="generating-the-bombs">Generating the bombs</h2>
 
-<p>For the \(B\) randomly positioned bombs, the first idea that comes to mind is the generate random numbers until we have \(B\) distinct numbers, like this</p>
+<p>For the \(B\) randomly positioned bombs, the first idea that comes to mind is to generate random numbers until we have \(B\) distinct numbers, like this</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>		let mut set=std::collections::HashSet::new();
 		while set.len() != B {
 			set.insert(rng.random_range(0..N*N));
 		}
 </code></pre></div></div>
-<p>It works, but it make last long if there are many bombs (\(B\) close to \(N^2\).. think of the extreme case where the grid is full of bombs). (There is a trick: if \(B&gt;\frac{N^2}{2}\) we can invert the logic and generate bomb-free positions instead of bomb positions.) I wanted a fast, deterministic algorithm, privileging <a href="https://en.wikipedia.org/wiki/Time_complexity">time</a> over <a href="https://en.wikipedia.org/wiki/Space_complexity">space</a> complexity, I choose the <a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">FisherYates shuffle</a> which make \(B\) <em>distincts</em> random numbers out of any \(B\) random numbers, distincts or not. It has \(O(N^2)\) space complexity (memory requirement).</p>
+<p>It works, but it may be slow if \(B\) is large (close to \(N^2$.. think of the extreme case where the grid is full of bombs). (There is a trick: if\)B&gt;\frac{N^2}{2}\(we can invert the logic and generate the bomb-free positions instead of bomb positions.) I wanted a fast, deterministic algorithm, privileging [time](https://en.wikipedia.org/wiki/Time_complexity) over [space](https://en.wikipedia.org/wiki/Space_complexity) complexity, I choose the [FisherYates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle) which make\)B\(*distincts* random numbers out of any\)B\(random numbers, distincts or not. It has\)O(N^2)$$ space complexity (memory requirement).</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/// The position arguments is a vector with all possible positions,
 /// typically: positions=(0...N*N).collect().
@@ -120,7 +120,8 @@ pub fn distinct_random_numbers(mut positions: Vec&lt;usize&gt;, b:usize) -&gt; V
 		increment_neighboors(&amp;mut grid,n,*p);
 	}
 </code></pre></div></div>
-<p>In our first approach, the grid has length \(NxN\), and we must take care of the edges when iterating over the neighbors positions. This makes quite many <code class="language-plaintext highlighter-rouge">if</code>s.</p>
+<p>In our first approach, the grid has length \(NxN\), and we must take care of the edges when iterating over the neighbors positions. 
+This makes quite many <code class="language-plaintext highlighter-rouge">if</code>s.</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fn increment_neighboors(grid:&amp;mut [usize], nu:usize, pos:usize) {
 	// ...
 	for dx in [-1,0,1] {
@@ -149,7 +150,7 @@ pub fn distinct_random_numbers(mut positions: Vec&lt;usize&gt;, b:usize) -&gt; V
 
 <h2 id="printing-the-grid">Printing the grid</h2>
 
-<p>Printing using <code class="language-plaintext highlighter-rouge">print!</code> or <code class="language-plaintext highlighter-rouge">println!</code> is <a href="https://users.rust-lang.org/t/efficiency-of-println-and-format/52772">slow</a>. It is much faster to write bytes directly to stdout, with a lookup for</p>
+<p>Printing using <code class="language-plaintext highlighter-rouge">print!</code> or <code class="language-plaintext highlighter-rouge">println!</code> is <a href="https://users.rust-lang.org/t/efficiency-of-println-and-format/52772">slow</a>. It is much faster to write bytes directly to stdout:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fn print_grid(grid:&amp;[usize], n:usize, printer : &amp;mut utils::Printer, show_count:bool) {
 	let print_lookup: [u8;11] = match show_count {
 		true =&gt; {
