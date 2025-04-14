@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-14T18:23:41+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">Hello</title><link href="http://localhost:4000/rust/2025/03/31/post.html" rel="alternate" type="text/html" title="Hello" /><published>2025-03-31T07:34:26+02:00</published><updated>2025-03-31T07:34:26+02:00</updated><id>http://localhost:4000/rust/2025/03/31/post</id><content type="html" xml:base="http://localhost:4000/rust/2025/03/31/post.html"><![CDATA[<p>This my first post. I hope it will not be too boring.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-14T18:28:28+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">Hello</title><link href="http://localhost:4000/rust/2025/03/31/post.html" rel="alternate" type="text/html" title="Hello" /><published>2025-03-31T07:34:26+02:00</published><updated>2025-03-31T07:34:26+02:00</updated><id>http://localhost:4000/rust/2025/03/31/post</id><content type="html" xml:base="http://localhost:4000/rust/2025/03/31/post.html"><![CDATA[<p>This my first post. I hope it will not be too boring.</p>
 
 <figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">_2d</span><span class="p">(</span><span class="n">index</span><span class="p">:</span><span class="nb">usize</span><span class="p">,</span><span class="n">n</span><span class="p">:</span><span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="p">(</span><span class="nb">usize</span><span class="p">,</span><span class="nb">usize</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nd">assert!</span><span class="p">(</span><span class="n">index</span><span class="o">&lt;</span><span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="n">n</span><span class="p">));</span>
@@ -293,7 +293,9 @@ Here are the timings I get on my debian box with a i7-4470 CPU and 32Gb RAM.</p>
 
 <h3 id="comparison-with-cc">Comparison with C/C++</h3>
 
-<p>The C++ implementation has margins and only one tile (K=1). So we set K=1 in the parallel version.</p>
+<p>The C++ implementation has margins and only one tile (K=1). So we set K=1 in the parallel version.
+Again D=2.
+Here are the timings (logscale with <code class="language-plaintext highlighter-rouge">log2</code>).</p>
 
 <table>
   <thead>
@@ -303,7 +305,7 @@ Here are the timings I get on my debian box with a i7-4470 CPU and 32Gb RAM.</p>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">Time as a function of N</td>
+      <td style="text-align: center">Time as a function of L</td>
     </tr>
   </tbody>
 </table>
