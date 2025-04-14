@@ -34,9 +34,9 @@ neighbors:
 .....
 ```
 
-So, this is just about generating a $$NxN$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is not about programming the game or solving it. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (Starting with rust, it took me much more than one hour to get the first working version). Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. 
+So, this is just about generating a $$NxN$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is not about programming the game or solving it. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (Starting with rust, it took me much more than one hour to get the first working version). 
 
-F.
+Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting.
 
 ## Generating the bombs
 
@@ -47,7 +47,7 @@ For the $$B$$ randomly positioned bombs, the first idea that comes to mind is to
 			set.insert(rng.random_range(0..N*N));
 		}
 ```
-It works, but it may be slow if $$B$$ is large (close to $$N^2$.. think of the extreme case where the grid is full of bombs). (There is a trick: if $$B>\frac{N^2}{2}$$ we can invert the logic and generate the bomb-free positions instead of bomb positions.) I wanted a fast, deterministic algorithm, privileging [time](https://en.wikipedia.org/wiki/Time_complexity) over [space](https://en.wikipedia.org/wiki/Space_complexity) complexity, I choose the [FisherYates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle) which make $$B$$ *distincts* random numbers out of any $$B$$ random numbers, distincts or not. It has $$O(N^2)$$ space complexity (memory requirement).
+It works, but it may be slow if $$B$$ is large (close to $$N^2$$.. think of the extreme case where the grid is full of bombs). (There is a trick: if $$B>\frac{N^2}{2}$$ we can invert the logic and generate the bomb-free positions instead of bomb positions.) I wanted a fast, deterministic algorithm, privileging [time](https://en.wikipedia.org/wiki/Time_complexity) over [space](https://en.wikipedia.org/wiki/Space_complexity) complexity, I choose the [FisherYates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle) which make $$B$$ *distincts* random numbers out of any $$B$$ random numbers, distincts or not. It has $$O(N^2)$$ space complexity (memory requirement).
 
 ```
 /// The position arguments is a vector with all possible positions,
