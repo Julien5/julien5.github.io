@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Minesweeper (1)"
+title:  "Minesweeper"
 date:   2025-03-29 08:28:19 +0100
 categories: minesweeper
 ---
@@ -37,9 +37,9 @@ So, this is just about generating a $$NxN$$ square grid with $$B$$ randomly posi
 
 Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. And since I and some coworkers had worked out several solutions in C/C++, i was curious to see how rust compares to them.
 
-## The Grid
+## Baseline
 
-The fastest implementations use an array of `usize` elements with length $NxN$. The reason for `usize` is the lookup performed in [`print_grid`](#printing-the-grid). (In later versions, i changed to Vec<u8>.) The element type `usize` is too large, in fact.
+The fastest C++ implementation use and so do i. The baseline rust version has an array of `usize` elements with length $NxN$. The reason for `usize` is the lookup performed in [`print_grid`](#printing-the-grid). The element type `usize` is too large, in fact. (In later versions, i changed to Vec<u8>.)
 ```
 const BOMB  : usize = 9;
 const ZERO  : usize = 0;
@@ -58,7 +58,7 @@ pub fn main(N : usize, B: usize, quiet: bool) {
 }
 ```
 
-## Generating the bombs
+### Generating the bombs
 
 For the $$B$$ randomly positioned bombs, the first idea that comes to mind is to generate random numbers until we have $$B$$ distinct numbers, like this
 ```
@@ -90,7 +90,7 @@ pub fn distinct_random_numbers(mut positions: Vec<usize>, b:usize) -> Vec<usize>
 }
 ```
 
-## Counting the bombs
+### Counting the bombs
 
 Assuming $$B<\frac{N^2}{2}$$, it is faster to run across bomb positions than to run over all bomb-free positions:
 ```
@@ -130,7 +130,7 @@ fn increment_neighboors(grid:&mut [usize], nu:usize, pos:usize) {
 ```
 This quite many `if`s is not very nice. 
 
-## Printing the grid
+### Printing the grid
 
 Printing using `print!` or `println!` is [slow](https://users.rust-lang.org/t/efficiency-of-println-and-format/52772). It is much faster to write bytes directly to stdout, line by line:
 ```
@@ -168,14 +168,13 @@ I could not help to make the output more readable with "|" as separators, even i
 | 1 | * | 2 | 1 |
 ```
 
-## Going parallel
+## Going Parallel
 
 We want to avoid using mutexes as much as possible. The idea is very simple: divide the large minesweeper grids into many small rectangular tiles (subgrids) of size $$(X+2)x(Y+2)$$ where $$X=N$$ and $$Y=N/K$$. Each tile has its margin (hence `X+2` and `Y+2`), so that we dont loose neighbors for the bomb on the tile edges. 
 
 | ![tile](/assets/minesweeper/tiles.png) |
 |:--------------------------------------:|
 | Tiles for N=6,K=3 => X=6, Y=2          |
-
 
 When the tiles are merged together for printing, we must take properly care of those edges (this is the `merge` function in [tile.rs](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/tile.rs)). This resulting algorithm is as follows:
 1. Determine $$K$$, the number of tiles. (This could be defined by the user.)
@@ -222,9 +221,44 @@ And now just replaced iterator with [parallel iterators](https://docs.rs/rayon/l
 
 ## Performance
 
-![K](/assets/minesweeper/time-chunks.png)
-![L](/assets/minesweeper/time-array-2.png)
-![L](/assets/minesweeper/time-array-8.png)
+### Baseline against Parallel
+
+First we check that the parallel version with one chunk (K=1, i.e. one tile, one thread, no parallelism) is *not* slower than the baseline.
+
+For our experiments with use large grids. The size $$N$$ is set with a parameter L:
+
+$$ N=1024*L $$
+
+and we let L varying. The number of bombs $$B$$ is set with a parameter D:
+
+$$ B=N^2/D $$
+
+and we vary D from 2 (many bombs) to larger values.
+Here are the timings I get on my debian box with a i7-4470 CPU and 32Gb RAM.
+
+| L  | D | baseline (time in s) | parallel (time in s) |
+|----|---|----------------------|----------------------|
+| 4  | 2 | 1.35                 | 1.16                 |
+| 8  | 2 | 5.65                 | 5.00                 |
+| 10 | 2 | 9.09                 | 7.81                 |
+
+It is not only *not* slower, it is a little faster. This is because with parallel version has margins and does not need to check boundaries: faster code with less branches. I checked that the baseline get similar timing to the parallel algorithm by manipulating it. If no bombs is on the grid edges and the bound checking is removed, the timings are similar.
+
+### Concurrency Speed Gain 
+
+| ![tile](/assets/minesweeper/time-chunks.png) |
+|:--------------------------------------------:|
+| $$L=8$$, $$D=2$$                             |
+
+Well, this is faster with more chunks :)
+
+### Comparison with C/C++
+
+The C++ implementation has margins and only one tile (K=1). So we set K=1 in the parallel version.
+
+| ![tile](/assets/minesweeper/time-array-2.png) |
+|:---------------------------------------------:|
+| Time as a function of N                       |
 
 ## Notes
 
