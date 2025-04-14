@@ -6,7 +6,6 @@ categories: rust
 ---
 
 So, minesweeper, interview problem at my job.
-The problem is given as follows:
 
 ```
 Minesweeper C/C++ exercise
@@ -91,27 +90,25 @@ This quite many `if`s is not very nice. Because of this, and because we want to 
 ## Multithreading 
 
 We want to avoid using mutexes as much as possible. The idea is very simple: divide the large minesweeper grids into many small tiles (subgrids) of size $$(X+2)x(Y+2)$$ where $$X=N$$ and $$Y=N/K$$. Each tile as its margin, so that we dont loose neighbors for the bomb on the tile edges. When the tiles are merged together for printing, we must take properly care of those edges. This resulting algorithm is as follows:
-1. Determine $$K$$, the number of subgrids. (This could be defined by the user.)
-2. For each subgrid, generate a chunk of (an array of) $$B/K$$ bomb positions.
-3. For each bomb chunk, generate the tile, placing the bombs and counting the neighbors.
-4. Aggregate the tiles together and fix the counts on the tile edges.
+1. Determine $$K$$, the number of tiles. (This could be defined by the user.)
+2. For each k in $${0,...,K-1}$$:
+   - generate a chunk of $$B/K$$ bomb positions.
+   - for each bomb chunk, create one tile, place the bombs and increment neighbors counts.
+3. Aggregate the $$K$$ tiles together and fix the counts on the tile edges.
+
+Step 2 can be done with concurrency because the chunks and the tiles are indepedant from each other. 
+Step 3 could be done in parallel, but not with [rayon](https://docs.rs/rayon/latest/rayon/) because of an [issue](https://github.com/rayon-rs/rayon/issues/592).
 
 Implementation with explicit for loops:
 ```
 fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
-	let mut tiles=Vec::new();
 	for index in 0..K {
 		let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
-		tiles.push(make_tile(chunk));
+		let tile=make_tile(chunk);
 	}
 	let mut acc=TileAccumulator::init();
-	for tile in tiles {
-		acc.aggregate(tile);
-	}
-	let mut printer=make_printer(quiet);
-	acc.print_bombs();
-	acc.print_counts();
-}
+	acc.aggregate(tile);
+	// todo: print
 ```
 
 Reformulated with iterators and [`map`](https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.map):
@@ -119,27 +116,32 @@ Reformulated with iterators and [`map`](https://doc.rust-lang.org/stable/std/ite
 fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
 	let mut acc=TileAccumulator::init();
 	let _:Vec<()>=(0..K).into_iter()
-		.map(|index| BombChunk::with_bomb_count(X,Y,index,Bchunk)).into_iter()
-		.map(|chunk| make_tile(chunk)).into_iter()
-		.map(|tile| acc.aggregate(tile)).collect();
-	acc.print_bombs();
-	acc.print_counts();
-}
+		.map(|index| {
+			let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
+			let tile=make_tile(chunk);
+			acc.aggregate(tile);
+		}).collect();
+	// todo: print	
 ```
 
 And now just replaced iterator with [parallel iterators](https://docs.rs/rayon/latest/rayon/iter/index.html):
 ```
 fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
-	let _:Vec<()>=indexes.into_par_iter()
-		.map(|index| BombChunk::with_bomb_count(X,Y,index,Bchunk)).into_par_iter()
-		.map(|chunk| make_tile(chunk)).into_par_iter()
-		.map(|tile| acc0.lock().unwrap().aggregate(tile))
-		.collect();
-	acc.print_bombs();
-	acc.print_counts();
+	let tiles:Vec<Tile>=(0..K).into_par_iter()
+		.map(|index| {
+			let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
+			make_tile(chunk)
+		}).collect();
+	let mut acc=TileAccumulator::init();
+	for tile in tiles {
+		acc.aggregate(tile);
+	}
 }
 ```
 
-**Note**: 
+## Notes
+
+### Statistical Cost Of Chunking 
+
 Generating bomb per tile has a "statistical" cost: the probability of the bomb distribution is not uniform over the large grid anymore. For example the probability of any chunk to have more (or less) than $$B/K$$ bombs is zero. At this price we reduce the space complexity.
 

@@ -7,8 +7,8 @@
 <meta name="generator" content="Jekyll v3.10.0" />
 <meta property="og:title" content="Minesweeper (1)" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="So, minesweeper, interview problem at my job. The problem is given as follows:" />
-<meta property="og:description" content="So, minesweeper, interview problem at my job. The problem is given as follows:" />
+<meta name="description" content="So, minesweeper, interview problem at my job." />
+<meta property="og:description" content="So, minesweeper, interview problem at my job." />
 <link rel="canonical" href="http://localhost:4000/rust/2025/03/29/post.html" />
 <meta property="og:url" content="http://localhost:4000/rust/2025/03/29/post.html" />
 <meta property="og:site_name" content="Your awesome title" />
@@ -17,7 +17,7 @@
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Minesweeper (1)" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2025-03-29T08:28:19+01:00","datePublished":"2025-03-29T08:28:19+01:00","description":"So, minesweeper, interview problem at my job. The problem is given as follows:","headline":"Minesweeper (1)","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/rust/2025/03/29/post.html"},"url":"http://localhost:4000/rust/2025/03/29/post.html"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2025-03-29T08:28:19+01:00","datePublished":"2025-03-29T08:28:19+01:00","description":"So, minesweeper, interview problem at my job.","headline":"Minesweeper (1)","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/rust/2025/03/29/post.html"},"url":"http://localhost:4000/rust/2025/03/29/post.html"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Your awesome title" /></head>
 <body><header class="site-header" role="banner">
@@ -51,8 +51,7 @@
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p>So, minesweeper, interview problem at my job.
-The problem is given as follows:</p>
+    <p>So, minesweeper, interview problem at my job.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Minesweeper C/C++ exercise
 1. Generate a NxN Minesweeper-Board with B bombs positioned randomly.
@@ -134,55 +133,61 @@ neighbors:
 
 <p>We want to avoid using mutexes as much as possible. The idea is very simple: divide the large minesweeper grids into many small tiles (subgrids) of size \((X+2)x(Y+2)\) where \(X=N\) and \(Y=N/K\). Each tile as its margin, so that we dont loose neighbors for the bomb on the tile edges. When the tiles are merged together for printing, we must take properly care of those edges. This resulting algorithm is as follows:</p>
 <ol>
-  <li>Determine \(K\), the number of subgrids. (This could be defined by the user.)</li>
-  <li>For each subgrid, generate a chunk of (an array of) \(B/K\) bomb positions.</li>
-  <li>For each bomb chunk, generate the tile, placing the bombs and counting the neighbors.</li>
-  <li>Aggregate the tiles together and fix the counts on the tile edges.</li>
+  <li>Determine \(K\), the number of tiles. (This could be defined by the user.)</li>
+  <li>For each k in \({0,...,K-1}\):
+    <ul>
+      <li>generate a chunk of \(B/K\) bomb positions.</li>
+      <li>for each bomb chunk, create one tile, place the bombs and increment neighbors counts.</li>
+    </ul>
+  </li>
+  <li>Aggregate the \(K\) tiles together and fix the counts on the tile edges.</li>
 </ol>
+
+<p>Step 2 can be done with concurrency because the chunks and the tiles are indepedant from each other. 
+Step 3 could be done in parallel, but not with <a href="https://docs.rs/rayon/latest/rayon/">rayon</a> because of an <a href="https://github.com/rayon-rs/rayon/issues/592">issue</a>.</p>
 
 <p>Implementation with explicit for loops:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
-	let mut tiles=Vec::new();
 	for index in 0..K {
 		let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
-		tiles.push(make_tile(chunk));
+		let tile=make_tile(chunk);
 	}
 	let mut acc=TileAccumulator::init();
-	for tile in tiles {
-		acc.aggregate(tile);
-	}
-	let mut printer=make_printer(quiet);
-	acc.print_bombs();
-	acc.print_counts();
-}
+	acc.aggregate(tile);
+	// todo: print
 </code></pre></div></div>
 
 <p>Reformulated with iterators and <a href="https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.map"><code class="language-plaintext highlighter-rouge">map</code></a>:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
 	let mut acc=TileAccumulator::init();
 	let _:Vec&lt;()&gt;=(0..K).into_iter()
-		.map(|index| BombChunk::with_bomb_count(X,Y,index,Bchunk)).into_iter()
-		.map(|chunk| make_tile(chunk)).into_iter()
-		.map(|tile| acc.aggregate(tile)).collect();
-	acc.print_bombs();
-	acc.print_counts();
-}
+		.map(|index| {
+			let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
+			let tile=make_tile(chunk);
+			acc.aggregate(tile);
+		}).collect();
+	// todo: print	
 </code></pre></div></div>
 
 <p>And now just replaced iterator with <a href="https://docs.rs/rayon/latest/rayon/iter/index.html">parallel iterators</a>:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
-	let _:Vec&lt;()&gt;=indexes.into_par_iter()
-		.map(|index| BombChunk::with_bomb_count(X,Y,index,Bchunk)).into_par_iter()
-		.map(|chunk| make_tile(chunk)).into_par_iter()
-		.map(|tile| acc0.lock().unwrap().aggregate(tile))
-		.collect();
-	acc.print_bombs();
-	acc.print_counts();
+	let tiles:Vec&lt;Tile&gt;=(0..K).into_par_iter()
+		.map(|index| {
+			let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
+			make_tile(chunk)
+		}).collect();
+	let mut acc=TileAccumulator::init();
+	for tile in tiles {
+		acc.aggregate(tile);
+	}
 }
 </code></pre></div></div>
 
-<p><strong>Note</strong>: 
-Generating bomb per tile has a “statistical” cost: the probability of the bomb distribution is not uniform over the large grid anymore. For example the probability of any chunk to have more (or less) than \(B/K\) bombs is zero. At this price we reduce the space complexity.</p>
+<h2 id="notes">Notes</h2>
+
+<h3 id="statistical-cost-of-chunking">Statistical Cost Of Chunking</h3>
+
+<p>Generating bomb per tile has a “statistical” cost: the probability of the bomb distribution is not uniform over the large grid anymore. For example the probability of any chunk to have more (or less) than \(B/K\) bombs is zero. At this price we reduce the space complexity.</p>
 
 
   </div><a class="u-url" href="/rust/2025/03/29/post.html" hidden></a>

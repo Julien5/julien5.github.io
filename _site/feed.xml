@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-14T05:34:45+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">Hello</title><link href="http://localhost:4000/rust/2025/03/31/post.html" rel="alternate" type="text/html" title="Hello" /><published>2025-03-31T07:34:26+02:00</published><updated>2025-03-31T07:34:26+02:00</updated><id>http://localhost:4000/rust/2025/03/31/post</id><content type="html" xml:base="http://localhost:4000/rust/2025/03/31/post.html"><![CDATA[<p>This my first post. I hope it will not be too boring.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-14T06:46:57+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">Hello</title><link href="http://localhost:4000/rust/2025/03/31/post.html" rel="alternate" type="text/html" title="Hello" /><published>2025-03-31T07:34:26+02:00</published><updated>2025-03-31T07:34:26+02:00</updated><id>http://localhost:4000/rust/2025/03/31/post</id><content type="html" xml:base="http://localhost:4000/rust/2025/03/31/post.html"><![CDATA[<p>This my first post. I hope it will not be too boring.</p>
 
 <figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">_2d</span><span class="p">(</span><span class="n">index</span><span class="p">:</span><span class="nb">usize</span><span class="p">,</span><span class="n">n</span><span class="p">:</span><span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="p">(</span><span class="nb">usize</span><span class="p">,</span><span class="nb">usize</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nd">assert!</span><span class="p">(</span><span class="n">index</span><span class="o">&lt;</span><span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="n">n</span><span class="p">));</span>
@@ -7,8 +7,7 @@
 	<span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
 <span class="p">}</span></code></pre></figure>
 
-<p><a href="https://github.com/julien5">test</a></p>]]></content><author><name></name></author><category term="rust" /><summary type="html"><![CDATA[This my first post. I hope it will not be too boring. fn _2d(index:usize,n:usize) -&gt; (usize,usize) { assert!(index&lt;(n*n)); let x=index%n; let y=index/n; (x,y) }]]></summary></entry><entry><title type="html">Minesweeper (1)</title><link href="http://localhost:4000/rust/2025/03/29/post.html" rel="alternate" type="text/html" title="Minesweeper (1)" /><published>2025-03-29T08:28:19+01:00</published><updated>2025-03-29T08:28:19+01:00</updated><id>http://localhost:4000/rust/2025/03/29/post</id><content type="html" xml:base="http://localhost:4000/rust/2025/03/29/post.html"><![CDATA[<p>So, minesweeper, interview problem at my job.
-The problem is given as follows:</p>
+<p><a href="https://github.com/julien5">test</a></p>]]></content><author><name></name></author><category term="rust" /><summary type="html"><![CDATA[This my first post. I hope it will not be too boring. fn _2d(index:usize,n:usize) -&gt; (usize,usize) { assert!(index&lt;(n*n)); let x=index%n; let y=index/n; (x,y) }]]></summary></entry><entry><title type="html">Minesweeper (1)</title><link href="http://localhost:4000/rust/2025/03/29/post.html" rel="alternate" type="text/html" title="Minesweeper (1)" /><published>2025-03-29T08:28:19+01:00</published><updated>2025-03-29T08:28:19+01:00</updated><id>http://localhost:4000/rust/2025/03/29/post</id><content type="html" xml:base="http://localhost:4000/rust/2025/03/29/post.html"><![CDATA[<p>So, minesweeper, interview problem at my job.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Minesweeper C/C++ exercise
 1. Generate a NxN Minesweeper-Board with B bombs positioned randomly.
@@ -90,55 +89,61 @@ neighbors:
 
 <p>We want to avoid using mutexes as much as possible. The idea is very simple: divide the large minesweeper grids into many small tiles (subgrids) of size \((X+2)x(Y+2)\) where \(X=N\) and \(Y=N/K\). Each tile as its margin, so that we dont loose neighbors for the bomb on the tile edges. When the tiles are merged together for printing, we must take properly care of those edges. This resulting algorithm is as follows:</p>
 <ol>
-  <li>Determine \(K\), the number of subgrids. (This could be defined by the user.)</li>
-  <li>For each subgrid, generate a chunk of (an array of) \(B/K\) bomb positions.</li>
-  <li>For each bomb chunk, generate the tile, placing the bombs and counting the neighbors.</li>
-  <li>Aggregate the tiles together and fix the counts on the tile edges.</li>
+  <li>Determine \(K\), the number of tiles. (This could be defined by the user.)</li>
+  <li>For each k in \({0,...,K-1}\):
+    <ul>
+      <li>generate a chunk of \(B/K\) bomb positions.</li>
+      <li>for each bomb chunk, create one tile, place the bombs and increment neighbors counts.</li>
+    </ul>
+  </li>
+  <li>Aggregate the \(K\) tiles together and fix the counts on the tile edges.</li>
 </ol>
+
+<p>Step 2 can be done with concurrency because the chunks and the tiles are indepedant from each other. 
+Step 3 could be done in parallel, but not with <a href="https://docs.rs/rayon/latest/rayon/">rayon</a> because of an <a href="https://github.com/rayon-rs/rayon/issues/592">issue</a>.</p>
 
 <p>Implementation with explicit for loops:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
-	let mut tiles=Vec::new();
 	for index in 0..K {
 		let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
-		tiles.push(make_tile(chunk));
+		let tile=make_tile(chunk);
 	}
 	let mut acc=TileAccumulator::init();
-	for tile in tiles {
-		acc.aggregate(tile);
-	}
-	let mut printer=make_printer(quiet);
-	acc.print_bombs();
-	acc.print_counts();
-}
+	acc.aggregate(tile);
+	// todo: print
 </code></pre></div></div>
 
 <p>Reformulated with iterators and <a href="https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.map"><code class="language-plaintext highlighter-rouge">map</code></a>:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
 	let mut acc=TileAccumulator::init();
 	let _:Vec&lt;()&gt;=(0..K).into_iter()
-		.map(|index| BombChunk::with_bomb_count(X,Y,index,Bchunk)).into_iter()
-		.map(|chunk| make_tile(chunk)).into_iter()
-		.map(|tile| acc.aggregate(tile)).collect();
-	acc.print_bombs();
-	acc.print_counts();
-}
+		.map(|index| {
+			let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
+			let tile=make_tile(chunk);
+			acc.aggregate(tile);
+		}).collect();
+	// todo: print	
 </code></pre></div></div>
 
 <p>And now just replaced iterator with <a href="https://docs.rs/rayon/latest/rayon/iter/index.html">parallel iterators</a>:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
-	let _:Vec&lt;()&gt;=indexes.into_par_iter()
-		.map(|index| BombChunk::with_bomb_count(X,Y,index,Bchunk)).into_par_iter()
-		.map(|chunk| make_tile(chunk)).into_par_iter()
-		.map(|tile| acc0.lock().unwrap().aggregate(tile))
-		.collect();
-	acc.print_bombs();
-	acc.print_counts();
+	let tiles:Vec&lt;Tile&gt;=(0..K).into_par_iter()
+		.map(|index| {
+			let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
+			make_tile(chunk)
+		}).collect();
+	let mut acc=TileAccumulator::init();
+	for tile in tiles {
+		acc.aggregate(tile);
+	}
 }
 </code></pre></div></div>
 
-<p><strong>Note</strong>: 
-Generating bomb per tile has a “statistical” cost: the probability of the bomb distribution is not uniform over the large grid anymore. For example the probability of any chunk to have more (or less) than \(B/K\) bombs is zero. At this price we reduce the space complexity.</p>]]></content><author><name></name></author><category term="rust" /><summary type="html"><![CDATA[So, minesweeper, interview problem at my job. The problem is given as follows:]]></summary></entry><entry><title type="html">Hello</title><link href="http://localhost:4000/rust/2025/03/26/welcome-to-jekyll.html" rel="alternate" type="text/html" title="Hello" /><published>2025-03-26T20:15:26+01:00</published><updated>2025-03-26T20:15:26+01:00</updated><id>http://localhost:4000/rust/2025/03/26/welcome-to-jekyll</id><content type="html" xml:base="http://localhost:4000/rust/2025/03/26/welcome-to-jekyll.html"><![CDATA[<p>This my first post. I hope it will not be too boring.</p>
+<h2 id="notes">Notes</h2>
+
+<h3 id="statistical-cost-of-chunking">Statistical Cost Of Chunking</h3>
+
+<p>Generating bomb per tile has a “statistical” cost: the probability of the bomb distribution is not uniform over the large grid anymore. For example the probability of any chunk to have more (or less) than \(B/K\) bombs is zero. At this price we reduce the space complexity.</p>]]></content><author><name></name></author><category term="rust" /><summary type="html"><![CDATA[So, minesweeper, interview problem at my job.]]></summary></entry><entry><title type="html">Hello</title><link href="http://localhost:4000/rust/2025/03/26/welcome-to-jekyll.html" rel="alternate" type="text/html" title="Hello" /><published>2025-03-26T20:15:26+01:00</published><updated>2025-03-26T20:15:26+01:00</updated><id>http://localhost:4000/rust/2025/03/26/welcome-to-jekyll</id><content type="html" xml:base="http://localhost:4000/rust/2025/03/26/welcome-to-jekyll.html"><![CDATA[<p>This my first post. I hope it will not be too boring.</p>
 
 <figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">_2d</span><span class="p">(</span><span class="n">index</span><span class="p">:</span><span class="nb">usize</span><span class="p">,</span><span class="n">n</span><span class="p">:</span><span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="p">(</span><span class="nb">usize</span><span class="p">,</span><span class="nb">usize</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nd">assert!</span><span class="p">(</span><span class="n">index</span><span class="o">&lt;</span><span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="n">n</span><span class="p">));</span>
