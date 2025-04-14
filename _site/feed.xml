@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-14T06:46:57+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">Hello</title><link href="http://localhost:4000/rust/2025/03/31/post.html" rel="alternate" type="text/html" title="Hello" /><published>2025-03-31T07:34:26+02:00</published><updated>2025-03-31T07:34:26+02:00</updated><id>http://localhost:4000/rust/2025/03/31/post</id><content type="html" xml:base="http://localhost:4000/rust/2025/03/31/post.html"><![CDATA[<p>This my first post. I hope it will not be too boring.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-14T07:38:46+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">Hello</title><link href="http://localhost:4000/rust/2025/03/31/post.html" rel="alternate" type="text/html" title="Hello" /><published>2025-03-31T07:34:26+02:00</published><updated>2025-03-31T07:34:26+02:00</updated><id>http://localhost:4000/rust/2025/03/31/post</id><content type="html" xml:base="http://localhost:4000/rust/2025/03/31/post.html"><![CDATA[<p>This my first post. I hope it will not be too boring.</p>
 
 <figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">_2d</span><span class="p">(</span><span class="n">index</span><span class="p">:</span><span class="nb">usize</span><span class="p">,</span><span class="n">n</span><span class="p">:</span><span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="p">(</span><span class="nb">usize</span><span class="p">,</span><span class="nb">usize</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nd">assert!</span><span class="p">(</span><span class="n">index</span><span class="o">&lt;</span><span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="n">n</span><span class="p">));</span>
@@ -47,6 +47,26 @@ neighbors:
 </code></pre></div></div>
 <p>It works, but it make last long if there are many bombs (\(B\) close to \(N^2\).. think of the extreme case where the grid is full of bombs). (There is a trick: if \(B&gt;\frac{N^2}{2}\) we can invert the logic and generate bomb-free positions instead of bomb positions.) I wanted a fast, deterministic algorithm, privileging <a href="https://en.wikipedia.org/wiki/Time_complexity">time</a> over <a href="https://en.wikipedia.org/wiki/Space_complexity">space</a> complexity, I choose the <a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">FisherYates shuffle</a> which make \(B\) <em>distincts</em> random numbers out of any \(B\) random numbers, distincts or not. It has \(O(N^2)\) space complexity (memory requirement).</p>
 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/// The position arguments is a vector with all possible positions,
+/// typically: positions=(0...N*N).collect().
+pub fn distinct_random_numbers(mut positions: Vec&lt;usize&gt;, b:usize) -&gt; Vec&lt;usize&gt; {
+	let mut rng = StdRng::seed_from_u64(3);
+	let L=positions.len();
+	// Fisher-Yates
+	for i in 0..b {
+		let end=L-i;
+		let j=rng.random_range(0..end);
+		positions.swap(j,end-1);
+	}
+	let mut G : Vec&lt;usize&gt;=vec![0;b];
+	let end=L;
+	for i in 0..b  {
+		G[i] = positions[end-i-1];
+	}
+	G
+}
+</code></pre></div></div>
+
 <h2 id="counting-the-bombs">Counting the bombs</h2>
 
 <p>Assuming \(B&lt;\frac{N^2}{2}\), it is faster to run across bomb positions than to run over all bomb-free positions:</p>
@@ -81,9 +101,34 @@ neighbors:
 	}
 }
 </code></pre></div></div>
-<p>This quite many <code class="language-plaintext highlighter-rouge">if</code>s is not very nice. Because of this, and because we want to parallelize, it makes sense to add “margins” to our grid, which gets length \((N+2)x(N+2)\).</p>
+<p>This quite many <code class="language-plaintext highlighter-rouge">if</code>s is not very nice.</p>
 
 <h2 id="printing-the-grid">Printing the grid</h2>
+
+<p>Printing using <code class="language-plaintext highlighter-rouge">print!</code> or <code class="language-plaintext highlighter-rouge">println!</code> is <a href="https://users.rust-lang.org/t/efficiency-of-println-and-format/52772">slow</a>. It is much faster to write bytes directly to stdout, with a lookup for</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fn print_grid(grid:&amp;[usize], n:usize, printer : &amp;mut utils::Printer, show_count:bool) {
+	let print_lookup: [u8;11] = match show_count {
+		true =&gt; {
+			[b' ',b'1',b'2',b'3',b'4',b'5',b'6',b'7',b'8',b'*',b' ']
+		}
+		_ =&gt; {
+			[b' ',b' ',b' ',b' ',b' ',b' ',b' ',b' ',b' ',b'*',b' ']
+		}
+	};
+	let mut output:Vec&lt;u8&gt; = prepare_output(n);
+	for ky in 0..n {
+		for kx in 0..n {
+			let k=from_2d((kx,ky),n);
+			output[4*kx+2]=print_lookup[grid[k] as usize];
+		}
+		printer.print(&amp;output);
+	}
+}
+</code></pre></div></div>
+
+<h2 id="chunking">Chunking</h2>
+
+<p>Because of this, and because we want to parallelize, it makes sense to add “margins” to our grid, which gets length \((N+2)x(N+2)\).</p>
 
 <h2 id="multithreading">Multithreading</h2>
 
@@ -104,40 +149,39 @@ Step 3 could be done in parallel, but not with <a href="https://docs.rs/rayon/la
 
 <p>Implementation with explicit for loops:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
+	let mut tiles = Vec::new();
 	for index in 0..K {
 		let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
-		let tile=make_tile(chunk);
+		tiles.push(make_tile(chunk));
 	}
-	let mut acc=TileAccumulator::init();
-	acc.aggregate(tile);
-	// todo: print
-</code></pre></div></div>
-
-<p>Reformulated with iterators and <a href="https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.map"><code class="language-plaintext highlighter-rouge">map</code></a>:</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
-	let mut acc=TileAccumulator::init();
-	let _:Vec&lt;()&gt;=(0..K).into_iter()
-		.map(|index| {
-			let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
-			let tile=make_tile(chunk);
-			acc.aggregate(tile);
-		}).collect();
-	// todo: print	
-</code></pre></div></div>
-
-<p>And now just replaced iterator with <a href="https://docs.rs/rayon/latest/rayon/iter/index.html">parallel iterators</a>:</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
-	let tiles:Vec&lt;Tile&gt;=(0..K).into_par_iter()
-		.map(|index| {
-			let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
-			make_tile(chunk)
-		}).collect();
 	let mut acc=TileAccumulator::init();
 	for tile in tiles {
 		acc.aggregate(tile);
 	}
-}
+	// print ...
 </code></pre></div></div>
+
+<p>The first loop can be reformulated with iterators and <a href="https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.map"><code class="language-plaintext highlighter-rouge">map</code></a>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	let tiles:Vec&lt;Tile&gt;=(0..K).into_iter()
+		.map(|index| {
+			let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
+			make_tile(chunk)
+		}).collect();
+</code></pre></div></div>
+
+<p>And now just replaced iterator with <a href="https://docs.rs/rayon/latest/rayon/iter/index.html">parallel iterators</a> to generate bombs and make tiles concurrently:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	let tiles:Vec&lt;Tile&gt;=(0..K).into_par_iter()
+		.map(|index| {
+			let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
+			make_tile(chunk)
+		}).collect();
+</code></pre></div></div>
+
+<h2 id="performance">Performance</h2>
+
+<p><img src="http://localhost:4000/assets/minesweeper/time-chunks.png" alt="K" />
+<img src="http://localhost:4000/assets/minesweeper/time-array-2.png" alt="L" />
+<img src="http://localhost:4000/assets/minesweeper/time-array-8.png" alt="L" /></p>
 
 <h2 id="notes">Notes</h2>
 

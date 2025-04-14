@@ -2,7 +2,7 @@
 layout: post
 title:  "Minesweeper (1)"
 date:   2025-03-29 08:28:19 +0100
-categories: rust 
+categories: rust
 ---
 
 So, minesweeper, interview problem at my job.
@@ -45,7 +45,28 @@ For the $$B$$ randomly positioned bombs, the first idea that comes to mind is th
 			set.insert(rng.random_range(0..N*N));
 		}
 ```
-It works, but it make last long if there are many bombs ($$B$$ close to $$N^2$$.. think of the extreme case where the grid is full of bombs). (There is a trick: if $$ B>\frac{N^2}{2} $$ we can invert the logic and generate bomb-free positions instead of bomb positions.) I wanted a fast, deterministic algorithm, privileging [time](https://en.wikipedia.org/wiki/Time_complexity) over [space](https://en.wikipedia.org/wiki/Space_complexity) complexity, I choose the [FisherYates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle) which make $$B$$ *distincts* random numbers out of any $$B$$ random numbers, distincts or not. It has $$O(N^2)$$ space complexity (memory requirement). 
+It works, but it make last long if there are many bombs ($$B$$ close to $$N^2$$.. think of the extreme case where the grid is full of bombs). (There is a trick: if $$ B>\frac{N^2}{2} $$ we can invert the logic and generate bomb-free positions instead of bomb positions.) I wanted a fast, deterministic algorithm, privileging [time](https://en.wikipedia.org/wiki/Time_complexity) over [space](https://en.wikipedia.org/wiki/Space_complexity) complexity, I choose the [FisherYates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle) which make $$B$$ *distincts* random numbers out of any $$B$$ random numbers, distincts or not. It has $$O(N^2)$$ space complexity (memory requirement).
+
+```
+/// The position arguments is a vector with all possible positions,
+/// typically: positions=(0...N*N).collect().
+pub fn distinct_random_numbers(mut positions: Vec<usize>, b:usize) -> Vec<usize> {
+	let mut rng = StdRng::seed_from_u64(3);
+	let L=positions.len();
+	// Fisher-Yates
+	for i in 0..b {
+		let end=L-i;
+		let j=rng.random_range(0..end);
+		positions.swap(j,end-1);
+	}
+	let mut G : Vec<usize>=vec![0;b];
+	let end=L;
+	for i in 0..b  {
+		G[i] = positions[end-i-1];
+	}
+	G
+}
+```
 
 ## Counting the bombs
 
@@ -83,9 +104,35 @@ fn increment_neighboors(grid:&mut [usize], nu:usize, pos:usize) {
 	}
 }
 ```
-This quite many `if`s is not very nice. Because of this, and because we want to parallelize, it makes sense to add "margins" to our grid, which gets length $$(N+2)x(N+2)$$. 
+This quite many `if`s is not very nice. 
 
 ## Printing the grid
+
+Printing using `print!` or `println!` is [slow](https://users.rust-lang.org/t/efficiency-of-println-and-format/52772). It is much faster to write bytes directly to stdout, with a lookup for 
+```
+fn print_grid(grid:&[usize], n:usize, printer : &mut utils::Printer, show_count:bool) {
+	let print_lookup: [u8;11] = match show_count {
+		true => {
+			[b' ',b'1',b'2',b'3',b'4',b'5',b'6',b'7',b'8',b'*',b' ']
+		}
+		_ => {
+			[b' ',b' ',b' ',b' ',b' ',b' ',b' ',b' ',b' ',b'*',b' ']
+		}
+	};
+	let mut output:Vec<u8> = prepare_output(n);
+	for ky in 0..n {
+		for kx in 0..n {
+			let k=from_2d((kx,ky),n);
+			output[4*kx+2]=print_lookup[grid[k] as usize];
+		}
+		printer.print(&output);
+	}
+}
+```
+
+## Chunking
+
+Because of this, and because we want to parallelize, it makes sense to add "margins" to our grid, which gets length $$(N+2)x(N+2)$$. 
 
 ## Multithreading 
 
@@ -102,42 +149,41 @@ Step 3 could be done in parallel, but not with [rayon](https://docs.rs/rayon/lat
 Implementation with explicit for loops:
 ```
 fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
+	let mut tiles = Vec::new();
 	for index in 0..K {
 		let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
-		let tile=make_tile(chunk);
+		tiles.push(make_tile(chunk));
 	}
 	let mut acc=TileAccumulator::init();
-	acc.aggregate(tile);
-	// todo: print
+	for tile in tiles {
+		acc.aggregate(tile);
+	}
+	// print ...
 ```
 
-Reformulated with iterators and [`map`](https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.map):
+The first loop can be reformulated with iterators and [`map`](https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.map):
 ```
-fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
-	let mut acc=TileAccumulator::init();
-	let _:Vec<()>=(0..K).into_iter()
+	let tiles:Vec<Tile>=(0..K).into_iter()
 		.map(|index| {
 			let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
-			let tile=make_tile(chunk);
-			acc.aggregate(tile);
+			make_tile(chunk)
 		}).collect();
-	// todo: print	
 ```
 
-And now just replaced iterator with [parallel iterators](https://docs.rs/rayon/latest/rayon/iter/index.html):
+And now just replaced iterator with [parallel iterators](https://docs.rs/rayon/latest/rayon/iter/index.html) to generate bombs and make tiles concurrently:
 ```
-fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
 	let tiles:Vec<Tile>=(0..K).into_par_iter()
 		.map(|index| {
 			let chunk=BombChunk::with_bomb_count(X,Y,index,Bchunk);
 			make_tile(chunk)
 		}).collect();
-	let mut acc=TileAccumulator::init();
-	for tile in tiles {
-		acc.aggregate(tile);
-	}
-}
 ```
+
+## Performance
+
+![K]({{site.url}}/assets/minesweeper/time-chunks.png)
+![L]({{site.url}}/assets/minesweeper/time-array-2.png)
+![L]({{site.url}}/assets/minesweeper/time-array-8.png)
 
 ## Notes
 
