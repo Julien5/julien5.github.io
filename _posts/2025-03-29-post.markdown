@@ -2,7 +2,7 @@
 layout: post
 title:  "Minesweeper (1)"
 date:   2025-03-29 08:28:19 +0100
-categories: rust minesweeper
+categories: minesweeper
 ---
 
 So, minesweeper, interview problem at my job:
