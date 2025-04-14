@@ -255,10 +255,12 @@ Well, this is faster with more chunks :)
 ### Comparison with C/C++
 
 The C++ implementation has margins and only one tile (K=1). So we set K=1 in the parallel version.
+Again D=2.
+Here are the timings (logscale with `log2`).
 
 | ![tile](/assets/minesweeper/time-array-2.png) |
 |:---------------------------------------------:|
-| Time as a function of N                       |
+| Time as a function of L                       |
 
 ## Notes
 
