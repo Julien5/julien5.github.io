@@ -2,7 +2,7 @@
 layout: post
 title:  "Minesweeper (1)"
 date:   2025-03-29 08:28:19 +0100
-categories: rust
+categories: rust minesweeper
 ---
 
 So, minesweeper, interview problem at my job:
@@ -35,6 +35,8 @@ neighbors:
 ```
 
 So, this is just about generating a $$NxN$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is not about programming the game or solving it. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (Starting with rust, it took me much more than one hour to get the first working version). Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. 
+
+F.
 
 ## Generating the bombs
 
@@ -182,9 +184,9 @@ And now just replaced iterator with [parallel iterators](https://docs.rs/rayon/l
 
 ## Performance
 
-![K]({{site.url}}/assets/minesweeper/time-chunks.png)
-![L]({{site.url}}/assets/minesweeper/time-array-2.png)
-![L]({{site.url}}/assets/minesweeper/time-array-8.png)
+![K](/assets/minesweeper/time-chunks.png)
+![L](/assets/minesweeper/time-array-2.png)
+![L](/assets/minesweeper/time-array-8.png)
 
 ## Notes
 
