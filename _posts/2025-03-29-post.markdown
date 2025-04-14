@@ -33,6 +33,7 @@ neighbors:
 .....
 .....
 ```
+Candidates are allowed to use any language they want and google if they need to. I took it as an exercise to learn a bit of rust.
 
 So, this is just about generating a $$NxN$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is not about programming the game or solving it. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (Starting with rust, it took me much more than one hour to get the first working version). 
 
@@ -133,13 +134,9 @@ fn print_grid(grid:&[usize], n:usize, printer : &mut utils::Printer, show_count:
 }
 ```
 
-## Chunking
+## Going parallel
 
-Because of this, and because we want to parallelize, it makes sense to add "margins" to our grid, which gets length $$(N+2)x(N+2)$$. 
-
-## Multithreading 
-
-We want to avoid using mutexes as much as possible. The idea is very simple: divide the large minesweeper grids into many small tiles (subgrids) of size $$(X+2)x(Y+2)$$ where $$X=N$$ and $$Y=N/K$$. Each tile as its margin, so that we dont loose neighbors for the bomb on the tile edges. When the tiles are merged together for printing, we must take properly care of those edges. This resulting algorithm is as follows:
+We want to avoid using mutexes as much as possible. The idea is very simple: divide the large minesweeper grids into many small rectangular tiles (subgrids) of size $$(X+2)x(Y+2)$$ where $$X=N$$ and $$Y=N/K$$. Each tile has its margin, so that we dont loose neighbors for the bomb on the tile edges. When the tiles are merged together for printing, we must take properly care of those edges. This resulting algorithm is as follows:
 1. Determine $$K$$, the number of tiles. (This could be defined by the user.)
 2. For each k in $${0,...,K-1}$$:
    - generate a chunk of $$B/K$$ bomb positions.
