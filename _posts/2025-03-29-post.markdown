@@ -168,9 +168,9 @@ I could not help to make the output more readable with "|" as separators, even i
 | 1 | * | 2 | 1 |
 ```
 
-## Going Parallel
+## Going Parallel with Tiles
 
-We want to avoid using mutexes as much as possible. The idea is very simple: divide the large minesweeper grids into many small rectangular tiles (subgrids) of size $$(X+2)x(Y+2)$$ where $$X=N$$ and $$Y=N/K$$. Each tile has its margin (hence `X+2` and `Y+2`), so that we dont loose neighbors for the bomb on the tile edges. 
+We want to avoid using mutexes as much as possible. The idea is very simple: divide the large minesweeper grids into many small rectangular tile (subgrids) of size $$(X+2)x(Y+2)$$ where $$X=N$$ and $$Y=N/K$$. Each tile has a margin (hence `X+2` and `Y+2`), so that we dont loose neighbors for the bomb on the tile edges. 
 
 | ![tile](/assets/minesweeper/tiles.png) |
 |:--------------------------------------:|
@@ -188,6 +188,7 @@ Step 3 could be done in parallel, but not with [rayon](https://docs.rs/rayon/lat
 
 Implementation with explicit for loops:
 ```
+// Bchunk = B/K
 fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
 	let mut tiles = Vec::new();
 	for index in 0..K {
@@ -210,7 +211,7 @@ The first loop can be reformulated with iterators and [`map`](https://doc.rust-l
 		}).collect();
 ```
 
-And now just replaced iterator with [parallel iterators](https://docs.rs/rayon/latest/rayon/iter/index.html) to generate bombs and make tiles concurrently:
+Thanks to the rayon crate, we just replace the standart iterator with [parallel iterators](https://docs.rs/rayon/latest/rayon/iter/index.html) to generate bombs and make tiles concurrently:
 ```
 	let tiles:Vec<Tile>=(0..K).into_par_iter()
 		.map(|index| {
@@ -221,9 +222,9 @@ And now just replaced iterator with [parallel iterators](https://docs.rs/rayon/l
 
 ## Performance
 
-### Baseline against Parallel
+### Baseline against Tiles
 
-First we check that the parallel version with one chunk (K=1, i.e. one tile, one thread, no parallelism) is *not* slower than the baseline.
+First we check that the tiled version with one tile (K=1, i.e. one tile, one thread, no parallelism) is *not* slower than the baseline.
 
 For our experiments with use large grids. The size $$N$$ is set with a parameter L:
 
@@ -236,13 +237,13 @@ $$ B=N^2/D $$
 and we vary D from 2 (many bombs) to larger values.
 Here are the timings I get on my debian box with a i7-4470 CPU and 32Gb RAM.
 
-| L  | D | baseline (time in s) | parallel (time in s) |
+| L  | D | baseline (time in s) | tiled (time in s) |
 |----|---|----------------------|----------------------|
 | 4  | 2 | 1.35                 | 1.16                 |
 | 8  | 2 | 5.65                 | 5.00                 |
 | 10 | 2 | 9.09                 | 7.81                 |
 
-It is not only *not* slower, it is a little faster. This is because with parallel version has margins and does not need to check boundaries: faster code with less branches. I checked that the baseline get similar timing to the parallel algorithm by manipulating it. If no bombs is on the grid edges and the bound checking is removed, the timings are similar.
+It is not only *not* slower, it is a little faster. This is because the tiled version has margins and does not need to check boundaries: faster code with less branches. I checked that the baseline get similar timing to the tiled algorithm by manipulating it. If no bombs is on the grid edges and the bound checking is removed, the timings are similar.
 
 ### Concurrency Speed Gain 
 
@@ -254,13 +255,14 @@ Well, this is faster with more chunks :)
 
 ### Comparison with C/C++
 
-The C++ implementation has margins and only one tile (K=1). So we set K=1 in the parallel version.
-Again D=2.
+The [C++ implementation](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/C/margin.cpp) has margins and only one tile (K=1). We can compare it to rust with the tiled version if we set K=1.
 Here are the timings (logscale with `log2`).
 
 | ![tile](/assets/minesweeper/time-array-2.png) |
 |:---------------------------------------------:|
-| Time as a function of L                       |
+| D=2.                                          |
+
+Rust wins, not by much, but it wins :-)
 
 ## Notes
 
