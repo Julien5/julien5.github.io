@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-15T07:27:50+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">Minesweeper</title><link href="http://localhost:4000/minesweeper/2025/03/29/post.html" rel="alternate" type="text/html" title="Minesweeper" /><published>2025-03-29T08:28:19+01:00</published><updated>2025-03-29T08:28:19+01:00</updated><id>http://localhost:4000/minesweeper/2025/03/29/post</id><content type="html" xml:base="http://localhost:4000/minesweeper/2025/03/29/post.html"><![CDATA[<p>So, minesweeper, interview coding problem:</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-15T07:41:51+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">Minesweeper</title><link href="http://localhost:4000/minesweeper/2025/03/29/post.html" rel="alternate" type="text/html" title="Minesweeper" /><published>2025-03-29T08:28:19+01:00</published><updated>2025-03-29T08:28:19+01:00</updated><id>http://localhost:4000/minesweeper/2025/03/29/post</id><content type="html" xml:base="http://localhost:4000/minesweeper/2025/03/29/post.html"><![CDATA[<p>So, minesweeper, interview coding problem:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Minesweeper C/C++ exercise
 1. Generate a NxN's Minesweeper grid with B bombs positioned randomly.
    The parameters N and B are passed as command line arguments.
@@ -182,8 +182,7 @@ pub fn distinct_random_numbers(mut positions: Vec&lt;usize&gt;, b:usize) -&gt; V
   <li>Aggregate the \(K\) tiles together and fix the counts on the tile edges.</li>
 </ol>
 
-<p>Step 2 can be done with concurrency because the chunks and the tiles are indepedant from each other. 
-Step 3 could be done in parallel, but not with <a href="https://docs.rs/rayon/latest/rayon/">rayon</a> because of an <a href="https://github.com/rayon-rs/rayon/issues/592">issue</a>.</p>
+<p>The loop at step 2 can be parallelized because the chunks and the tiles are indepedant from each other. Step 3 could be integrated in step 2, fixing the counts on the fly, right after the tiles have been produced. But this would require a mutex, and the <a href="https://docs.rs/rayon/latest/rayon/">rayon</a> has an <a href="https://github.com/rayon-rs/rayon/issues/592">issue</a> with using mutexes.</p>
 
 <p>Implementation with explicit for loops:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// Bchunk = B/K
@@ -220,9 +219,7 @@ fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
 
 <h3 id="baseline-against-tiles">Baseline against Tiles</h3>
 
-<p>First we check that the tiled version with one tile (K=1, i.e. one tile, one thread, no parallelism) is <em>not</em> slower than the baseline.</p>
-
-<p>For our experiments with use large grids. The size \(N\) is set with a parameter L:</p>
+<p>First we check that the tiled version with one tile (K=1, i.e. one tile, one thread, no parallelism) is <em>not</em> slower than the baseline. For our experiments with use large grids. The size \(N\) is set with a parameter L:</p>
 
 \[N=1024*L\]
 
@@ -264,7 +261,7 @@ Here are the timings I get on my debian box with a i7-4470 CPU and 32Gb RAM.</p>
   </tbody>
 </table>
 
-<p>It is not only <em>not</em> slower, it is a little faster. This is because the tiled version has margins and does not need to check boundaries: faster code with less branches. I checked that the baseline get similar timing to the tiled algorithm by manipulating it. If no bombs is on the grid edges and the bound checking is removed, the timings are similar.</p>
+<p>The tiled version is not only <em>not</em> slower, it is a little faster than the baseline. This is because the tiled version does not need to check boundaries: faster code with less branches. I checked that the baseline get similar timing to the tiled algorithm if I <a href="https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline-manipulated.rs">manipulate</a> it so to remove bound checking (I constrained the bomb positions to avoid edges). Then the timings are similar to the tiled version.</p>
 
 <h3 id="concurrency-speed-gain">Concurrency Speed Gain</h3>
 

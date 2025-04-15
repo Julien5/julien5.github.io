@@ -183,8 +183,7 @@ When the tiles are merged together for printing, we must take properly care of t
    - for each bomb chunk, create one tile, place the bombs and increment neighbors counts.
 3. Aggregate the $$K$$ tiles together and fix the counts on the tile edges.
 
-Step 2 can be done with concurrency because the chunks and the tiles are indepedant from each other. 
-Step 3 could be done in parallel, but not with [rayon](https://docs.rs/rayon/latest/rayon/) because of an [issue](https://github.com/rayon-rs/rayon/issues/592).
+The loop at step 2 can be parallelized because the chunks and the tiles are indepedant from each other. Step 3 could be integrated in step 2, fixing the counts on the fly, right after the tiles have been produced. But this would require a mutex, and the [rayon](https://docs.rs/rayon/latest/rayon/) has an [issue](https://github.com/rayon-rs/rayon/issues/592) with using mutexes. 
 
 Implementation with explicit for loops:
 ```
@@ -224,9 +223,7 @@ Thanks to the rayon crate, we just replace the standart iterator with [parallel 
 
 ### Baseline against Tiles
 
-First we check that the tiled version with one tile (K=1, i.e. one tile, one thread, no parallelism) is *not* slower than the baseline.
-
-For our experiments with use large grids. The size $$N$$ is set with a parameter L:
+First we check that the tiled version with one tile (K=1, i.e. one tile, one thread, no parallelism) is *not* slower than the baseline. For our experiments with use large grids. The size $$N$$ is set with a parameter L:
 
 $$ N=1024*L $$
 
@@ -243,7 +240,7 @@ Here are the timings I get on my debian box with a i7-4470 CPU and 32Gb RAM.
 | 8  | 2 | 5.65                 | 5.00                 |
 | 10 | 2 | 9.09                 | 7.81                 |
 
-It is not only *not* slower, it is a little faster. This is because the tiled version has margins and does not need to check boundaries: faster code with less branches. I checked that the baseline get similar timing to the tiled algorithm by manipulating it. If no bombs is on the grid edges and the bound checking is removed, the timings are similar.
+The tiled version is not only *not* slower, it is a little faster than the baseline. This is because the tiled version does not need to check boundaries: faster code with less branches. I checked that the baseline get similar timing to the tiled algorithm if I [manipulate](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline-manipulated.rs) it so to remove bound checking (I constrained the bomb positions to avoid edges). Then the timings are similar to the tiled version. 
 
 ### Concurrency Speed Gain 
 
