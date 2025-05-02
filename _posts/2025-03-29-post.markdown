@@ -5,7 +5,14 @@ date:   2025-03-29 08:28:19 +0100
 categories: minesweeper
 ---
 
-So, minesweeper, interview coding problem:
+In his essay *On Writing*, Stephen King advises writers to begin with a "situation" rather than a fully fleshed-out plot. The idea is to take a simple scenario, like a woman alone in her house with her ex-husband circling outside in the dark, and then "unpack" it to see where the story leads. At first glance, programming might seem worlds away from such tension-filled moments. Code appears rigid, logical—hardly the stuff of drama. Yet, if you look beneath the surface, you'll find a different kind of narrative at play. As [Pieter Hintjens](https://en.wikipedia.org/wiki/Pieter_Hintjens) points out in his excellent [guide to ZeroMQ](https://zguide.zeromq.org/docs/chapter6/), the world of software development is shaped by very human forces: [stupidity, selfishness, jealousy, and fear](https://zguide.zeromq.org/docs/chapter6/#Psychology-of-Software-Architecture). These aren't just abstract flaws—they drive decisions, fuel conflicts, and create their own kinds of high-stakes situations.
+
+In my case, jealousy is at work and and this blog post is about trying to outdo my colleagues on a small coding challenge we use in interviews. The goal: take the fastest C++ solution the team produced, re-implement the same algorithm using my modest Rust skills as a beginner, and see if I can beat C++.
+
+So, [minesweeper](https://en.wikipedia.org/wiki/Minesweeper_(video_game)), may be best shown with an image:
+![image](/assets/minesweeper/kmines.png)
+
+## Interview coding problem:
 ```
 Minesweeper C/C++ exercise
 1. Generate a NxN's Minesweeper grid with B bombs positioned randomly.
@@ -33,7 +40,7 @@ $ ./minesweeper 5 2
 ```
 Applicants are allowed to use any language they want (C, C++) and use google if they need to. I took it as an exercise to learn a bit of rust.
 
-So, this is just about generating a $$NxN$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is not about programming the game or solving it. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (Starting with rust, it took me much more than one hour to get the first working version). 
+This is just about generating a $$NxN$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is not about programming the game or solving it. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs). (Starting with rust, it took me much more than one hour to get the first working version). 
 
 Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. And since I and some coworkers had worked out C/C++ programs for that problem, I was curious to see how rust compares to them.
 
