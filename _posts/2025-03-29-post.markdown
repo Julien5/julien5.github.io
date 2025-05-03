@@ -206,7 +206,13 @@ At this point I could call it a day and move along, but I was caught and wanted 
 
 ## Grid With Margin
 
-As a first step to a concurrent algorithm, I pad the grid with a margin. This will allow us in the second step to split the grid into many subgrids that can be process independantly, without loosing neighboors counts. This way, we avoid using mutexes, and as a bonus we can remove a couple of `ifs` (in both rust and C++) and indeed this alone makes the algorithms faster (less branches). Before leaving C++ behind, I look it its perforance with the margin algorithm.
+As a first step to a concurrent algorithm, I pad the grid with margins. 
+
+| ![tile](/assets/minesweeper/margins.png) |
+|:----------------------------------------:|
+| Grid padded with margins                 |
+
+This will allow us in the second step to split the grid into many subgrids that can be process independantly, without loosing neighboors counts. This way, we avoid using mutexes, and as a bonus we can remove a couple of `ifs` (in both rust and C++) and indeed this alone makes the algorithms faster (less branches). Before leaving C++ behind, I look it its perforance with the margin algorithm.
 
 **Many bombs:**
 
@@ -275,17 +281,23 @@ Thanks to the rayon crate, we just replace the standart iterator with [parallel 
 		}).collect();
 ```
 
-## Performance
+### Performance
 
-### Concurrency Speed Gain 
+The size of the grid is fixed to $$N=8 \times 1024$$. The number of bombs is $$B=N^2/2$$ and the number of chunks (or tiles) processed in parallel varies.
 
 | ![tile](/assets/minesweeper/time-chunks.png) |
-|:--------------------------------------------:|
-| $$L=8$$, $$D=2$$                             |
 
-Well, this is faster with more chunks :)
+Well, as expected, this is faster with more chunks. And it takes less memory! 
+
+| ![tile](/assets/minesweeper/space-chunks.png) |
+
+Probably because the bomb generation is spread over time: Assuming chunk 2 is processed first, and chunk 3 is generated at a later time, the chunk 2 memory is freed when chunk 3 starts allocating memory. The maximum amount of memory allocated at any given time decreases.
 
 ## Notes
+
+### Where is the code ?
+
+The C++ code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/C/), the rust code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/). The script that produces the picture is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/measurement/main.sh).
 
 ### Statistical Cost Of Chunking 
 
