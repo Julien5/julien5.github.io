@@ -38,11 +38,11 @@ $ ./minesweeper 5 2
 .....
 .....
 ```
-This is just about **generating** a $$NxN$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is **not** about programming a playable game or solving it. Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs).  (As a Rust beginner, it took me well over an hour to get a working prototype.)
+This is just about **generating** a $$N\times N$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is **not** about programming a playable game or solving it. Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs).  (As a Rust beginner, it took me well over an hour to get a working prototype.)
 
 ## Baseline rust version
 
-The fastest C++ implementation among our team's C++ solutions is based on an array of length $$NxN$$ representing the minesweeper grid, and an array of length $$B$$ with the bomb positions. I follow the same approach for the rust implementation. My initial rust version has an array with `usize` elements. The reason for `usize` is the lookup performed in [`print_grid`](#printing-the-grid), but the element type `usize` is quite large (8 bytes on my PC). (In later versions, I switched to `Vec<u8>` for better memory efficiency.) The main function:
+The fastest C++ implementation among our team's C++ solutions is based on an array of length $$N\times N$$ representing the minesweeper grid, and an array of length $$B$$ with the bomb positions. I follow the same approach for the rust implementation. My initial rust version has an array with `usize` elements. The reason for `usize` is the lookup performed in [`print_grid`](#printing-the-grid), but the element type `usize` is quite large (8 bytes on my PC). (In later versions, I switched to `Vec<u8>` for better memory efficiency.) The main function:
 ```
 const BOMB  : usize = 9;
 const ZERO  : usize = 0;
@@ -238,7 +238,7 @@ The idea is very simple: divide the large minesweeper grids into multiple small 
 |:--------------------------------------:|
 | Tiles for N=6,K=3 => X=6, Y=2          |
 
-If $$K$$ is the number of tiles, each tile has dimension $$(X+2)x(Y+2)$$ where $$X=N$$ and $$Y=N/K$$.
+If $$K$$ is the number of tiles, each tile has dimension $$(X+2) \times (Y+2)$$ where $$X=N$$ and $$Y=N/K$$.
 
 When merging the tiles for printing, we must take properly care of those edges (this is the `merge` function in [tile.rs](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/tile.rs)). This resulting algorithm is as follows:
 1. Determine $$K$$, the number of tiles. (This could be defined by the user.)
