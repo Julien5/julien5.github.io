@@ -299,7 +299,7 @@ This behavior likely occurs because bomb generation is distributed over time. Fo
 
 ### Where is the code ?
 
-The C++ code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/C/), the rust code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/). The script that produces the picture is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/measurement/main.sh).
+The C++ code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/C/), the rust code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/). The script that produces the picture is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/measure/main.sh).
 
 ### Statistical Cost Of Chunking 
 
