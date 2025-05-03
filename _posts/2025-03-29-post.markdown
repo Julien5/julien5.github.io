@@ -5,10 +5,14 @@ date:   2025-03-29 08:28:19 +0100
 categories: minesweeper
 ---
 
-In his essay [*On Writing*](https://en.wikipedia.org/wiki/On_Writing:_A_Memoir_of_the_Craft), Stephen King advises writers to begin with a "situation" rather than a fully fleshed-out plot. The idea is to take a simple scenario, like a woman alone in her house with her ex-husband circling outside in the dark, and then "unpack" it to see where the story leads. At first glance, programming might seem worlds away from such tension-filled moments. Yet, if you look beneath the surface, you'll find a different kind of narrative at play. As [Pieter Hintjens](https://en.wikipedia.org/wiki/Pieter_Hintjens) points out in his excellent [*The Guide*](https://zguide.zeromq.org/), the world of software development is shaped by very human forces: [stupidity, selfishness, jealousy, and fear](https://zguide.zeromq.org/docs/chapter6/#Psychology-of-Software-Architecture). In my case, jealousy is at work and and this blog post is about trying to outdo my coworkers on a small coding challenge we use in interviews. A couple of years ago, each team members gave its best on the coding challenge and my implementation was not the fastest. It was the one with the lower memory usage, if I remember well, but it was slow. Now my goal: take the fastest C++ code the team produced, re-implement the same algorithm using my (very modest) beginner Rust skills, and see if I can beat C++. I am the husband and I have a rusty knife in the hand.
+In his essay [*On Writing*](https://en.wikipedia.org/wiki/On_Writing:_A_Memoir_of_the_Craft), Stephen King advises aspiring writers to begin with a "situation" rather than a fully fleshed-out plot. The idea is to take a simple scenario, like a woman alone in her house with her ex-husband circling outside in the dark, and then "unpack" it to see where the story leads. At first glance, programming might seem worlds away from such tension-filled moments. Yet, if you look beneath the surface, you'll find a different kind of narrative at play. As [Pieter Hintjens](https://en.wikipedia.org/wiki/Pieter_Hintjens) points out in his excellent [*The Guide*](https://zguide.zeromq.org/), the world of software development is shaped by dark forces: [stupidity, selfishness, jealousy, and fear](https://zguide.zeromq.org/docs/chapter6/#Psychology-of-Software-Architecture). In my case, jealousy is at work.
+
+
+A couple of years ago, each team members gave its best on a small coding challenge we use in interviews. My implementation was not the fastest. Maybe it was the slowest, maybe not, I don't remember. It was the one with the lower memory usage, but it was slow. This blog post is about trying to fix that. I'm going to take the fastest C++ code the team produced, re-implement the same algorithm using my (very modest) beginner Rust skills, and see if that beats C++. I am the husband and I have a rusty knife in the hand.
 
 ## Minesweeper
-An image may be better than a thousand words: 
+
+For those who don't remember what [minesweeper](https://en.wikipedia.org/wiki/Minesweeper_(video_game)) is, an image may be better than a thousand words: 
 
 ![image](/assets/minesweeper/kmines.png)
 
@@ -38,11 +42,11 @@ $ ./minesweeper 5 2
 .....
 .....
 ```
-This is just about **generating** a $$N\times N$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is **not** about programming a playable game or solving it. Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs).  (As a Rust beginner, it took me well over an hour to get a working prototype.)
+This is just about **generating** a $$N\times N$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is **not** about programming a playable game or solving it. Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs).  As a Rust beginner, it took me well over an hour to get a working prototype.
 
 ## Baseline rust version
 
-The fastest C++ implementation among our team's C++ solutions is based on an array of length $$N\times N$$ representing the minesweeper grid, and an array of length $$B$$ with the bomb positions. I follow the same approach for the rust implementation. My initial rust version has an array with `usize` elements. The reason for `usize` is the lookup performed in [`print_grid`](#printing-the-grid), but the element type `usize` is quite large (8 bytes on my PC). (In later versions, I switched to `Vec<u8>` for better memory efficiency.) The main function:
+The fastest C++ implementation among our team's C++ solutions is based on an array of length $$N\times N=N^2$$ representing the minesweeper grid, and an array of length $$B$$ with the bomb positions. I follow the same approach for the rust implementation. My initial rust version has an array with `usize` elements. The reason for `usize` is the lookup performed in [`print_grid`](#printing-the-grid), but the element type `usize` is quite large (8 bytes on my PC). In later versions, I switched to `Vec<u8>` for better memory efficiency. The main function:
 ```
 const BOMB  : usize = 9;
 const ZERO  : usize = 0;
@@ -70,9 +74,9 @@ For the $$B$$ randomly positioned bombs, the first idea that comes to mind is to
 			set.insert(rng.random_range(0..N*N));
 		}
 ```
-That may be slow if $$B$$ is large (close to $$N^2$$.. think of the extreme case where the grid is full of bombs). There is a trick: if $$B>\frac{N^2}{2}$$ we can invert the logic and generate the bomb-free positions instead of bomb positions. 
+That may be slow if $$B$$ is large... think of the extreme case where the grid is full of bombs. (There is a trick: if $$B>\frac{N^2}{2}$$ we can invert the logic and generate the bomb-free positions instead of bomb positions). 
 
-I wanted a fast, deterministic algorithm that prioritizes [time](https://en.wikipedia.org/wiki/Time_complexity) over [space](https://en.wikipedia.org/wiki/Space_complexity) complexity, and chose the Fisher–Yates shuffle. This algorithm makes $$B$$ *distincts* random numbers out of any $$B$$ random numbers, distincts or not. The tradeoff is that it has $$O(N^2)$$ space complexity (memory requirement).
+I wanted a fast, deterministic algorithm that prioritizes [time](https://en.wikipedia.org/wiki/Time_complexity) over [space](https://en.wikipedia.org/wiki/Space_complexity) complexity, and chose the Fisher–Yates shuffle. It makes $$B$$ *distincts* random numbers out of any $$B$$ random numbers, distincts or not. The trade-off is that it has $$O(N^2)$$ space complexity.
 
 ```
 // in utils.rs
@@ -101,7 +105,7 @@ fn distinct_random_numbers(N: usize, B: usize) -> Vec<usize> {
 
 ### Counting the bombs
 
-Assuming $$B<\frac{N^2}{2}$$, it is faster to run across bomb positions than to run over all bomb-free positions:
+Assuming $$B<\frac{N^2}{2}$$, it is faster to run over bomb positions than to run over all bomb-free positions:
 ```
 pub fn main(n : usize, b: usize, quiet: bool) {
 	let mut grid : Vec<usize> = vec![ZERO; n*n];
@@ -111,33 +115,35 @@ pub fn main(n : usize, b: usize, quiet: bool) {
 		increment_neighboors(&mut grid,n,*p);
 	}
 ```
-The grid element has length $$NxN$$, and we must take care of the edges when iterating over the neighbors positions. This makes quite many `if`s.
+The grid element has length $$NxN$$, and we must take care of the edges when iterating over the neighbors positions. 
 ```
-fn increment_neighboors(grid:&mut [usize], nu:usize, pos:usize) {
-	// ...
-	for dx in [-1,0,1] {
-		let posnx=posx+dx;
-		if posnx<0 || posnx>=n {
-			continue;
-		}
-		for dy in [-1,0,1] {
-			if dx == 0 && dy == 0 {
-				continue
-			}
-			let posny=posy+dy;
-			if posny<0 || posny>=n {
-				continue;
-			}
-			// ...
-			// increment the neighboors count
-			if grid[lu] != BOMB {
-				grid[lu]+=1;
-			}
-		}
-	}
+fn increment_neighboors(grid: &mut [usize], _N: usize, pos: usize) {
+    let (posxu, posyu) = to_2d(pos, _N);
+    let N = _N as isize;
+    let (posx, posy) = (posxu as isize, posyu as isize);
+    for dx in [-1, 0, 1] {
+        let posnx = posx + dx;
+        if posnx < 0 || posnx >= N {
+            continue;
+        }
+        for dy in [-1, 0, 1] {
+            if dx == 0 && dy == 0 {
+                continue;
+            }
+            let posny = posy + dy;
+            if posny < 0 || posny >= N {
+                continue;
+            }
+            let l = posny * N + posnx;
+            let lu = l as usize;
+            if grid[lu] != BOMB {
+                grid[lu] += 1;
+            }
+        }
+    }
 }
 ```
-There are many `if` branches. 
+Bound checking in the two dimensions costs us two `if`. I'll come back to that later.
 
 ### Printing the grid
 
@@ -177,16 +183,20 @@ The complete code is [here](https://github.com/Julien5/sandbox/blob/master/test/
 | 1 | * | 2 | 1 |
 ```
 
+The C++ code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/C/), the rust code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/). The script that measure performance and produces the picture shown below is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/measure/main.sh).
+
 ## Performance 
 
 **Is rust faster?** It is faster. 
+
+Well, no, we have to build the code first and rust is not faster.
 
 |      | version      | build flags             | build time          |
 |------|--------------|-------------------------|---------------------|
 | Rust | rustc 1.84.0 | `cargo build --release` | 1.7 s               |
 | C++  | gcc 12.2.0   | `g++ -O3 -DNDEBUG`      | 1.1 s  (`make -j8`) |
 
-The measurments are done on a debian (bookworm) box with a i7-4470 CPU and 32Gb RAM. The output of the processes under test is redirect to `/dev/null`.
+The measurements are done on a debian (bookworm) box with a i7-4470 CPU and 32 Gb RAM. The output of the processes under test is redirect to `/dev/null`.
 
 **Many Bombs**
 
@@ -198,23 +208,23 @@ Rust beats C++. Lets try again with less bombs.
 
 **Less Bombs**
 
-The performance delta gets larger, for example with $$B=N^2/8$$:
+The performance delta gets even larger, for example with $$B=N^2/8$$:
 
 | ![tile](/assets/minesweeper/time-array-baseline-8.png) |
 
-I'm not sure why this is happening, and it's a bit unsettling. I fear there might be an error in the code, but I haven't been able to identify it. If you spot any issues, please feel free to email me. Perhaps the Rust compiler is simply working harder to optimize, which could explain the increased compilation time. Honestly, I don't know.
+I'm not sure why this is happening, and it's a bit unsettling. I fill like rust killed C++ a little more than I wanted. I fear there might be an error in the code, but I haven't been able to identify it. If you spot any issues, please feel free open an [issue](https://github.com/Julien5/sandbox/issues) on github. Perhaps the Rust compiler is simply working harder to optimize, which could explain the increased compilation time. Honestly, I don't know.
 
-At this point I could call it a day and move on, but I was caught and wanted to make my minesweeper code faster with multithreading. [Fearless Concurrency](https://doc.rust-lang.org/book/ch16-00-concurrency.html) is a big selling point of rust. 
+At this point I could call it a day and move on, but I was caught and wanted to make my minesweeper code  multithreaded. [Fearless Concurrency](https://doc.rust-lang.org/book/ch16-00-concurrency.html) is a big selling point of rust. 
 
 ## Grid With Margin
 
-As a first step to a concurrent algorithm, I pad the grid with margins. 
+As a first step toward a concurrent algorithm, I pad the grid with margins. 
 
 | ![tile](/assets/minesweeper/margins.png) |
 |:----------------------------------------:|
 | Grid padded with margins                 |
 
-This will allow us, in the second step, to divide the grid into multiple subgrids that can be process independantly without loosing neighboors counts. By doing so, we avoid the need for mutexes, and as a bonus we can eliminate a couple of `ifs`. This alone  makes the code faster (in both rust and C++). Before leaving C++ behind, lets look at the performance with the margin algorithm.
+This will allow us, in the second step, to divide the grid into multiple subgrids that can be process independantly without loosing neighboors counts. And as a bonus we can eliminate bound checking. This alone  makes the code faster (in both rust and C++). Before leaving C++ behind, lets look at the performance gain we get by eliminating bound checking:
 
 **Many bombs:**
 
@@ -296,10 +306,6 @@ Well, as expected, this is faster with more chunks. And it takes less memory!
 This behavior likely occurs because bomb generation is distributed over time. For instance, if chunk 2 is processed first and chunk 3 is generated later, the memory allocated for chunk 2 is freed when chunk 3 begins allocating its own memory. As a result, the peak memory usage at any given moment decreases.
 
 ## Notes
-
-### Where is the code ?
-
-The C++ code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/C/), the rust code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/). The script that produces the picture is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/measure/main.sh).
 
 ### Statistical Cost Of Chunking 
 
