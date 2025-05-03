@@ -141,7 +141,7 @@ There are many `if` branches.
 
 ### Printing the grid
 
-Printing using `print!` or `println!` is [slow](https://users.rust-lang.org/t/efficiency-of-println-and-format/52772). It is much faster to write bytes directly to stdout. I convert the grid elements to printable characters with a lookup table, and print line-by-line:
+Printing using `print!` or `println!` is [slow](https://users.rust-lang.org/t/efficiency-of-println-and-format/52772), especially when printing large amounts of data. It is much faster to write bytes directly to standard output. I convert the grid elements to printable characters using a lookup table and print them line by line:
 ```
 fn print_grid(grid:&[usize], n:usize, printer : &mut utils::Printer, show_count:bool) {
 	let print_lookup: [u8;11] = match show_count {
@@ -202,9 +202,9 @@ The performance delta gets larger, for example with $$B=N^2/8$$:
 
 | ![tile](/assets/minesweeper/time-array-baseline-8.png) |
 
-I don't know why. This is a bit scary. I fear there is an error in the code, but I don't see. If you see an error, please drop me an email. Maybe the rust compiler just tries harder to optimize (which takes more time). I don't know.
+I'm not sure why this is happening, and it's a bit unsettling. I fear there might be an error in the code, but I haven't been able to identify it. If you spot any issues, please feel free to email me. Perhaps the Rust compiler is simply working harder to optimize, which could explain the increased compilation time. Honestly, I don't know.
 
-At this point I could call it a day and move along, but I was caught and wanted to make my minesweeper code faster with multithreading. [Fearless Concurrency](https://doc.rust-lang.org/book/ch16-00-concurrency.html) is a big selling point of rust. 
+At this point I could call it a day and move on, but I was caught and wanted to make my minesweeper code faster with multithreading. [Fearless Concurrency](https://doc.rust-lang.org/book/ch16-00-concurrency.html) is a big selling point of rust. 
 
 ## Grid With Margin
 
