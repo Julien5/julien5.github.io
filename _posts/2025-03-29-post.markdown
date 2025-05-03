@@ -5,10 +5,11 @@ date:   2025-03-29 08:28:19 +0100
 categories: minesweeper
 ---
 
-In his essay *On Writing*, Stephen King advises writers to begin with a "situation" rather than a fully fleshed-out plot. The idea is to take a simple scenario, like a woman alone in her house with her ex-husband circling outside in the dark, and then "unpack" it to see where the story leads. At first glance, programming might seem worlds away from such tension-filled moments. Code appears rigid, logical—hardly the stuff of drama. Yet, if you look beneath the surface, you'll find a different kind of narrative at play. As [Pieter Hintjens](https://en.wikipedia.org/wiki/Pieter_Hintjens) points out in his excellent [*The Guide*](https://zguide.zeromq.org/), the world of software development is shaped by very human forces: [stupidity, selfishness, jealousy, and fear](https://zguide.zeromq.org/docs/chapter6/#Psychology-of-Software-Architecture). In my case, jealousy is at work and and this blog post is about trying to outdo my coworkers on a small coding challenge we use in interviews. The goal: take the fastest C++ code the team produced, re-implement the same algorithm using my (very modest) beginner Rust skills, and see if I can beat C++. I am the husband and I have a rusty knife in the hand.
+In his essay [*On Writing*](https://en.wikipedia.org/wiki/On_Writing:_A_Memoir_of_the_Craft), Stephen King advises writers to begin with a "situation" rather than a fully fleshed-out plot. The idea is to take a simple scenario, like a woman alone in her house with her ex-husband circling outside in the dark, and then "unpack" it to see where the story leads. At first glance, programming might seem worlds away from such tension-filled moments. Code appears rigid, logical—hardly the stuff of drama. Yet, if you look beneath the surface, you'll find a different kind of narrative at play. As [Pieter Hintjens](https://en.wikipedia.org/wiki/Pieter_Hintjens) points out in his excellent [*The Guide*](https://zguide.zeromq.org/), the world of software development is shaped by very human forces: [stupidity, selfishness, jealousy, and fear](https://zguide.zeromq.org/docs/chapter6/#Psychology-of-Software-Architecture). In my case, jealousy is at work and and this blog post is about trying to outdo my coworkers on a small coding challenge we use in interviews. The goal: take the fastest C++ code the team produced, re-implement the same algorithm using my (very modest) beginner Rust skills, and see if I can beat C++. I am the husband and I have a rusty knife in the hand.
 
-## Interview coding problem:
-[Minesweeper](https://en.wikipedia.org/wiki/Minesweeper_(video_game)) may be best shown with an image:
+## Minesweeper
+An image may be better than a thousand words: 
+
 ![image](/assets/minesweeper/kmines.png)
 
 The problem is given to the candidates as follows:
