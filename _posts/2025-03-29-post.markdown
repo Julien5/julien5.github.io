@@ -214,7 +214,7 @@ As a first step to a concurrent algorithm, I pad the grid with margins.
 |:----------------------------------------:|
 | Grid padded with margins                 |
 
-This will allow us in the second step to split the grid into many subgrids that can be process independantly, without loosing neighboors counts. This way, we avoid using mutexes, and as a bonus we can remove a couple of `ifs` (in both rust and C++) and indeed this alone makes the algorithms faster (less branches). Before leaving C++ behind, I look it its perforance with the margin algorithm.
+This will allow us, in the second step, to divide the grid into multiple subgrids that can be process independantly without loosing neighboors counts. By doing so, we avoid the need for mutexes, and as a bonus we can eliminate a couple of `ifs`. This alone  makes the code faster (in both rust and C++). Before leaving C++ behind, lets look at the performance with the margin algorithm.
 
 **Many bombs:**
 
@@ -226,28 +226,28 @@ This will allow us in the second step to split the grid into many subgrids that 
 
 The speed gains in rust and C++ are similar. The C++-margin performance is close to the rust-baseline, striking. 
 
-I checked that the baseline get similar timing to the margin algorithm if I [manipulate](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline-manipulated.rs) it so to remove bound checking (I constrained the bomb positions to avoid edges). Then the timings are similar to the tiled version. 
+I checked that the baseline get similar timing to the margin algorithm if I [manipulate](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline-manipulated.rs) it so to remove bound checking (I constrained the bomb positions to avoid edges). Then the timings are similar to the margin version. 
 
-OK, now good bye C++.
+OK, now *good bye C++*.
 
 ## Going Parallel with Tiles
 
-The idea is very simple: divide the large minesweeper grids into many small rectangular tiles (subgrids), as shown here:
+The idea is very simple: divide the large minesweeper grids into multiple small rectangular tiles (subgrids), as shown here:
 
 | ![tile](/assets/minesweeper/tiles.png) |
 |:--------------------------------------:|
 | Tiles for N=6,K=3 => X=6, Y=2          |
 
-If $$K$$ is the number of tiles, each tile has size $$(X+2)x(Y+2)$$ where $$X=N$$ and $$Y=N/K$$.
+If $$K$$ is the number of tiles, each tile has dimension $$(X+2)x(Y+2)$$ where $$X=N$$ and $$Y=N/K$$.
 
-When the tiles are merged together for printing, we must take properly care of those edges (this is the `merge` function in [tile.rs](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/tile.rs)). This resulting algorithm is as follows:
+When merging the tiles for printing, we must take properly care of those edges (this is the `merge` function in [tile.rs](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/tile.rs)). This resulting algorithm is as follows:
 1. Determine $$K$$, the number of tiles. (This could be defined by the user.)
 2. For each k in $${0,...,K-1}$$:
    - generate a chunk of $$B/K$$ bomb positions.
    - for each bomb chunk, create one tile, place the bombs and increment neighbors counts.
 3. Aggregate the $$K$$ tiles together and fix the counts on the tile edges.
 
-The loop at step 2 can be parallelized because the chunks and the tiles are indepedant from each other. Step 3 could be integrated in step 2, fixing the counts on the fly, right after the tiles have been produced. But this would require a mutex, and the [rayon](https://docs.rs/rayon/latest/rayon/) has an [issue](https://github.com/rayon-rs/rayon/issues/592) with using mutexes. 
+The loop at step 2 can be parallelized since the chunks and the tiles are indepedant from each other. Step 3 could be integrated in step 2, fixing the counts on the fly, immediately after the tiles have been produced. But this would require a mutex, and the [rayon](https://docs.rs/rayon/latest/rayon/) has an [issue](https://github.com/rayon-rs/rayon/issues/592) with using mutexes. 
 
 Implementation with explicit for loops:
 ```
@@ -293,7 +293,7 @@ Well, as expected, this is faster with more chunks. And it takes less memory!
 
 | ![tile](/assets/minesweeper/space-chunks.png) |
 
-Probably because the bomb generation is spread over time: Assuming chunk 2 is processed first, and chunk 3 is generated at a later time, the chunk 2 memory is freed when chunk 3 starts allocating memory. The maximum amount of memory allocated at any given time decreases.
+This behavior likely occurs because bomb generation is distributed over time. For instance, if chunk 2 is processed first and chunk 3 is generated later, the memory allocated for chunk 2 is freed when chunk 3 begins allocating its own memory. As a result, the peak memory usage at any given moment decreases.
 
 ## Notes
 
