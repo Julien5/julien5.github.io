@@ -135,7 +135,7 @@ fn increment_neighboors(grid:&mut [usize], nu:usize, pos:usize) {
 	}
 }
 ```
-This quite many `if`s is not very nice. 
+There are many `if` branches. 
 
 ### Printing the grid
 
@@ -175,13 +175,62 @@ The complete code is [here](https://github.com/Julien5/sandbox/blob/master/test/
 | 1 | * | 2 | 1 |
 ```
 
+## Performance 
+
+**Is rust faster?** It is faster. 
+
+|      | version      | build flags             | build time          |
+|------|--------------|-------------------------|---------------------|
+| Rust | rustc 1.84.0 | `cargo build --release` | 1.7 s               |
+| C++  | gcc 12.2.0   | `g++ -O3 -DNDEBUG`      | 1.1 s  (`make -j8`) |
+
+The measurments are done on a debian (bookworm) box with a i7-4470 CPU and 32Gb RAM. The output of the processes under test is redirect to `/dev/null`.
+
+**Many Bombs**
+
+We populate every two position on the grid with a bomb ($$B=N^2/2$$). Here are the timings for varying grid sizes:
+
+| ![tile](/assets/minesweeper/time-array-baseline-2.png) |
+
+Rust beats C++. Lets try again with less bombs.
+
+**Less Bombs**
+
+The performance delta gets larger, for example with $$B=N^2/8$$:
+
+| ![tile](/assets/minesweeper/time-array-baseline-8.png) |
+
+I don't know why. This is a bit scary. I fear there is an error in the code, but I don't see. If you see an error, please drop me an email. Maybe the rust compiler just tries harder to optimize (which takes more time). I don't know.
+
+At this point I could call it a day and move along, but I was caught and wanted to make my minesweeper code faster with multithreading. [Fearless Concurrency](https://doc.rust-lang.org/book/ch16-00-concurrency.html) is a big selling point of rust. 
+
+## Grid With Margin
+
+As a first step to a concurrent algorithm, I pad the grid with a margin. This will allow us in the second step to split the grid into many subgrids that can be process independantly, without loosing neighboors counts. This way, we avoid using mutexes, and as a bonus we can remove a couple of `ifs` (in both rust and C++) and indeed this alone makes the algorithms faster (less branches). Before leaving C++ behind, I look it its perforance with the margin algorithm.
+
+**Many bombs:**
+
+| ![tile](/assets/minesweeper/time-array-compare-2.png) |
+
+**Less bombs:**
+
+| ![tile](/assets/minesweeper/time-array-compare-8.png) |
+
+The speed gains in rust and C++ are similar. The C++-margin performance is close to the rust-baseline, striking. 
+
+I checked that the baseline get similar timing to the margin algorithm if I [manipulate](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline-manipulated.rs) it so to remove bound checking (I constrained the bomb positions to avoid edges). Then the timings are similar to the tiled version. 
+
+OK, now good bye C++.
+
 ## Going Parallel with Tiles
 
-We want to avoid using mutexes as much as possible. The idea is very simple: divide the large minesweeper grids into many small rectangular tiles (subgrids) of size $$(X+2)x(Y+2)$$ where $$X=N$$ and $$Y=N/K$$. Each tile has a margin (hence `X+2` and `Y+2`), so that we dont loose neighbors for the bomb on the tile edges. 
+The idea is very simple: divide the large minesweeper grids into many small rectangular tiles (subgrids), as shown here:
 
 | ![tile](/assets/minesweeper/tiles.png) |
 |:--------------------------------------:|
 | Tiles for N=6,K=3 => X=6, Y=2          |
+
+If $$K$$ is the number of tiles, each tile has size $$(X+2)x(Y+2)$$ where $$X=N$$ and $$Y=N/K$$.
 
 When the tiles are merged together for printing, we must take properly care of those edges (this is the `merge` function in [tile.rs](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/tile.rs)). This resulting algorithm is as follows:
 1. Determine $$K$$, the number of tiles. (This could be defined by the user.)
@@ -228,27 +277,6 @@ Thanks to the rayon crate, we just replace the standart iterator with [parallel 
 
 ## Performance
 
-### Baseline against Tiles
-
-First we check that the tiled version with one tile (K=1, i.e. one tile, one thread, no parallelism) is *not* slower than the baseline. For our experiments with use large grids. The size $$N$$ is set with a parameter L:
-
-$$ N=1024L $$
-
-and we let L varying. The number of bombs $$B$$ is set with a parameter D:
-
-$$ B=N^2/D $$
-
-and we vary D from 2 (many bombs) to larger values.
-Here are the timings I get on my debian box with a i7-4470 CPU and 32Gb RAM.
-
-| L  | D | baseline (time in s) | tiled (time in s) |
-|----|---|----------------------|----------------------|
-| 4  | 2 | 1.35                 | 1.16                 |
-| 8  | 2 | 5.65                 | 5.00                 |
-| 10 | 2 | 9.09                 | 7.81                 |
-
-The tiled version is not only *not* slower, it is a little faster than the baseline. This is because the tiled version does not need to check boundaries: faster code with less branches. I checked that the baseline get similar timing to the tiled algorithm if I [manipulate](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline-manipulated.rs) it so to remove bound checking (I constrained the bomb positions to avoid edges). Then the timings are similar to the tiled version. 
-
 ### Concurrency Speed Gain 
 
 | ![tile](/assets/minesweeper/time-chunks.png) |
@@ -256,17 +284,6 @@ The tiled version is not only *not* slower, it is a little faster than the basel
 | $$L=8$$, $$D=2$$                             |
 
 Well, this is faster with more chunks :)
-
-### Comparison with C/C++
-
-The [C++ implementation](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/C/margin.cpp) has margins and only one tile (K=1). We can compare it to rust with the tiled version if we set K=1.
-Here are the timings (logscale with `log2`).
-
-| ![tile](/assets/minesweeper/time-array-2.png) |
-|:---------------------------------------------:|
-| D=2.                                          |
-
-Rust wins, not by much, but it wins :-)
 
 ## Notes
 
