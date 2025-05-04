@@ -1,7 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-05-03T11:06:47+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">Minesweeper</title><link href="http://localhost:4000/minesweeper/2025/03/29/post.html" rel="alternate" type="text/html" title="Minesweeper" /><published>2025-03-29T08:28:19+01:00</published><updated>2025-03-29T08:28:19+01:00</updated><id>http://localhost:4000/minesweeper/2025/03/29/post</id><content type="html" xml:base="http://localhost:4000/minesweeper/2025/03/29/post.html"><![CDATA[<p>In his essay <a href="https://en.wikipedia.org/wiki/On_Writing:_A_Memoir_of_the_Craft"><em>On Writing</em></a>, Stephen King advises writers to begin with a “situation” rather than a fully fleshed-out plot. The idea is to take a simple scenario, like a woman alone in her house with her ex-husband circling outside in the dark, and then “unpack” it to see where the story leads. At first glance, programming might seem worlds away from such tension-filled moments. Yet, if you look beneath the surface, you’ll find a different kind of narrative at play. As <a href="https://en.wikipedia.org/wiki/Pieter_Hintjens">Pieter Hintjens</a> points out in his excellent <a href="https://zguide.zeromq.org/"><em>The Guide</em></a>, the world of software development is shaped by very human forces: <a href="https://zguide.zeromq.org/docs/chapter6/#Psychology-of-Software-Architecture">stupidity, selfishness, jealousy, and fear</a>. In my case, jealousy is at work and and this blog post is about trying to outdo my coworkers on a small coding challenge we use in interviews. A couple of years ago, each team members gave its best on the coding challenge and my implementation was not the fastest. It was the one with the lower memory usage, if I remember well, but it was slow. Now my goal: take the fastest C++ code the team produced, re-implement the same algorithm using my (very modest) beginner Rust skills, and see if I can beat C++. I am the husband and I have a rusty knife in the hand.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-05-04T07:21:45+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">Minesweeper</title><link href="http://localhost:4000/minesweeper/2025/03/29/post.html" rel="alternate" type="text/html" title="Minesweeper" /><published>2025-03-29T08:28:19+01:00</published><updated>2025-03-29T08:28:19+01:00</updated><id>http://localhost:4000/minesweeper/2025/03/29/post</id><content type="html" xml:base="http://localhost:4000/minesweeper/2025/03/29/post.html"><![CDATA[<p>In his essay <a href="https://en.wikipedia.org/wiki/On_Writing:_A_Memoir_of_the_Craft"><em>On Writing</em></a>, Stephen King advises aspiring writers to begin with a “situation” rather than a fully fleshed-out plot. The idea is to take a simple scenario, like a woman alone in her house with her ex-husband circling outside in the dark, and then “unpack” it to see where the story leads. 
+At first glance, programming might seem worlds away from such tension-filled moments. 
+Yet, if you look beneath the surface, you’ll find a different kind of narrative at play. 
+As <a href="https://en.wikipedia.org/wiki/Pieter_Hintjens">Pieter Hintjens</a> points out in his excellent <a href="https://zguide.zeromq.org/"><em>The Guide</em></a>, the world of software development is shaped by dark forces: <a href="https://zguide.zeromq.org/docs/chapter6/#Psychology-of-Software-Architecture">stupidity, selfishness, jealousy, and fear</a>. In my case, jealousy is at work.</p>
+
+<p>A couple of years ago, each team members gave its best on a small coding challenge we use in interviews. My implementation was not the fastest. Maybe it was the slowest, maybe not, I don’t remember. It was the one with the lower memory usage, but it was slow. This blog post is about trying to fix that. I’m going to take the fastest C++ code the team produced, re-implement the same algorithm using my (very modest) beginner Rust skills, and see if that beats C++. I am the husband and I have a rusty knife in the hand.</p>
 
 <h2 id="minesweeper">Minesweeper</h2>
-<p>An image may be better than a thousand words:</p>
+
+<p>For those who don’t remember what <a href="https://en.wikipedia.org/wiki/Minesweeper_(video_game)">minesweeper</a> is, an image may be better than a thousand words:</p>
 
 <p><img src="/assets/minesweeper/kmines.png" alt="image" /></p>
 
@@ -30,11 +36,11 @@ $ ./minesweeper 5 2
 .....
 .....
 </code></pre></div></div>
-<p>This is just about <strong>generating</strong> a \(N\times N\) square grid with \(B\) randomly positioned bombs and count the bombs. This is <strong>not</strong> about programming a playable game or solving it. Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. My first version is <a href="https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs">here</a>.  (As a Rust beginner, it took me well over an hour to get a working prototype.)</p>
+<p>This is just about <strong>generating</strong> a \(N\times N\) square grid with \(B\) randomly positioned bombs and count the bombs. This is <strong>not</strong> about programming a playable game or solving it. Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. My first version is <a href="https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs">here</a>.  As a Rust beginner, it took me well over an hour to get a working prototype.</p>
 
 <h2 id="baseline-rust-version">Baseline rust version</h2>
 
-<p>The fastest C++ implementation among our team’s C++ solutions is based on an array of length \(N\times N\) representing the minesweeper grid, and an array of length \(B\) with the bomb positions. I follow the same approach for the rust implementation. My initial rust version has an array with <code class="language-plaintext highlighter-rouge">usize</code> elements. The reason for <code class="language-plaintext highlighter-rouge">usize</code> is the lookup performed in <a href="#printing-the-grid"><code class="language-plaintext highlighter-rouge">print_grid</code></a>, but the element type <code class="language-plaintext highlighter-rouge">usize</code> is quite large (8 bytes on my PC). (In later versions, I switched to <code class="language-plaintext highlighter-rouge">Vec&lt;u8&gt;</code> for better memory efficiency.) The main function:</p>
+<p>The fastest C++ implementation among our team’s C++ solutions is based on an array of length \(N\times N=N^2\) representing the minesweeper grid, and an array of length \(B\) with the bomb positions. I follow the same approach for the rust implementation. My initial rust version has an array with <code class="language-plaintext highlighter-rouge">usize</code> elements. The reason for <code class="language-plaintext highlighter-rouge">usize</code> is the lookup performed in <a href="#printing-the-grid"><code class="language-plaintext highlighter-rouge">print_grid</code></a>, but the element type <code class="language-plaintext highlighter-rouge">usize</code> is quite large (8 bytes on my PC). In later versions, I switched to <code class="language-plaintext highlighter-rouge">Vec&lt;u8&gt;</code> for better memory efficiency. The main function:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const BOMB  : usize = 9;
 const ZERO  : usize = 0;
 
@@ -60,9 +66,9 @@ pub fn main(N : usize, B: usize, quiet: bool) {
 			set.insert(rng.random_range(0..N*N));
 		}
 </code></pre></div></div>
-<p>That may be slow if \(B\) is large (close to \(N^2\).. think of the extreme case where the grid is full of bombs). There is a trick: if \(B&gt;\frac{N^2}{2}\) we can invert the logic and generate the bomb-free positions instead of bomb positions.</p>
+<p>That may be slow if \(B\) is large… think of the extreme case where the grid is full of bombs. (There is a trick: if \(B&gt;\frac{N^2}{2}\) we can invert the logic and generate the bomb-free positions instead of bomb positions).</p>
 
-<p>I wanted a fast, deterministic algorithm that prioritizes <a href="https://en.wikipedia.org/wiki/Time_complexity">time</a> over <a href="https://en.wikipedia.org/wiki/Space_complexity">space</a> complexity, and chose the Fisher–Yates shuffle. This algorithm makes \(B\) <em>distincts</em> random numbers out of any \(B\) random numbers, distincts or not. The tradeoff is that it has \(O(N^2)\) space complexity (memory requirement).</p>
+<p>I wanted a fast, deterministic algorithm that prioritizes <a href="https://en.wikipedia.org/wiki/Time_complexity">time</a> over <a href="https://en.wikipedia.org/wiki/Space_complexity">space</a> complexity, and chose the Fisher–Yates shuffle. It makes \(B\) <em>distincts</em> random numbers out of any \(B\) random numbers, distincts or not. The trade-off is that it has \(O(N^2)\) space complexity.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// in utils.rs
 pub fn fisher_yates_shuffle(mut positions: Vec&lt;usize&gt;, B: usize) -&gt; Vec&lt;usize&gt; {
@@ -90,7 +96,7 @@ fn distinct_random_numbers(N: usize, B: usize) -&gt; Vec&lt;usize&gt; {
 
 <h3 id="counting-the-bombs">Counting the bombs</h3>
 
-<p>Assuming \(B&lt;\frac{N^2}{2}\), it is faster to run across bomb positions than to run over all bomb-free positions:</p>
+<p>Assuming \(B&lt;\frac{N^2}{2}\), it is faster to run over bomb positions than to run over all bomb-free positions:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pub fn main(n : usize, b: usize, quiet: bool) {
 	let mut grid : Vec&lt;usize&gt; = vec![ZERO; n*n];
 	let Bx = distinct_random_numbers(...);
@@ -99,32 +105,34 @@ fn distinct_random_numbers(N: usize, B: usize) -&gt; Vec&lt;usize&gt; {
 		increment_neighboors(&amp;mut grid,n,*p);
 	}
 </code></pre></div></div>
-<p>The grid element has length \(NxN\), and we must take care of the edges when iterating over the neighbors positions. This makes quite many <code class="language-plaintext highlighter-rouge">if</code>s.</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fn increment_neighboors(grid:&amp;mut [usize], nu:usize, pos:usize) {
-	// ...
-	for dx in [-1,0,1] {
-		let posnx=posx+dx;
-		if posnx&lt;0 || posnx&gt;=n {
-			continue;
-		}
-		for dy in [-1,0,1] {
-			if dx == 0 &amp;&amp; dy == 0 {
-				continue
-			}
-			let posny=posy+dy;
-			if posny&lt;0 || posny&gt;=n {
-				continue;
-			}
-			// ...
-			// increment the neighboors count
-			if grid[lu] != BOMB {
-				grid[lu]+=1;
-			}
-		}
-	}
+<p>The grid element has length \(NxN\), and we must take care of the edges when iterating over the neighbors positions.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fn increment_neighboors(grid: &amp;mut [usize], _N: usize, pos: usize) {
+    let (posxu, posyu) = to_2d(pos, _N);
+    let N = _N as isize;
+    let (posx, posy) = (posxu as isize, posyu as isize);
+    for dx in [-1, 0, 1] {
+        let posnx = posx + dx;
+        if posnx &lt; 0 || posnx &gt;= N {
+            continue;
+        }
+        for dy in [-1, 0, 1] {
+            if dx == 0 &amp;&amp; dy == 0 {
+                continue;
+            }
+            let posny = posy + dy;
+            if posny &lt; 0 || posny &gt;= N {
+                continue;
+            }
+            let l = posny * N + posnx;
+            let lu = l as usize;
+            if grid[lu] != BOMB {
+                grid[lu] += 1;
+            }
+        }
+    }
 }
 </code></pre></div></div>
-<p>There are many <code class="language-plaintext highlighter-rouge">if</code> branches.</p>
+<p>Bound checking in the two dimensions costs us two <code class="language-plaintext highlighter-rouge">if</code>. I’ll come back to that later.</p>
 
 <h3 id="printing-the-grid">Printing the grid</h3>
 
@@ -162,9 +170,13 @@ fn distinct_random_numbers(N: usize, B: usize) -&gt; Vec&lt;usize&gt; {
 | 1 | * | 2 | 1 |
 </code></pre></div></div>
 
+<p>The C++ code is <a href="https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/C/">here</a>, the rust code is <a href="https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/">here</a>. The script that measure performance and produces the picture shown below is <a href="https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/measure/main.sh">here</a>.</p>
+
 <h2 id="performance">Performance</h2>
 
 <p><strong>Is rust faster?</strong> It is faster.</p>
+
+<p>Well, no, we have to build the code first and rust is not faster.</p>
 
 <table>
   <thead>
@@ -191,7 +203,7 @@ fn distinct_random_numbers(N: usize, B: usize) -&gt; Vec&lt;usize&gt; {
   </tbody>
 </table>
 
-<p>The measurments are done on a debian (bookworm) box with a i7-4470 CPU and 32Gb RAM. The output of the processes under test is redirect to <code class="language-plaintext highlighter-rouge">/dev/null</code>.</p>
+<p>The measurements are done on a debian (bookworm) box with a i7-4470 CPU and 32 Gb RAM. The output of the processes under test is redirect to <code class="language-plaintext highlighter-rouge">/dev/null</code>.</p>
 
 <p><strong>Many Bombs</strong></p>
 
@@ -209,7 +221,7 @@ fn distinct_random_numbers(N: usize, B: usize) -&gt; Vec&lt;usize&gt; {
 
 <p><strong>Less Bombs</strong></p>
 
-<p>The performance delta gets larger, for example with \(B=N^2/8\):</p>
+<p>The performance delta gets even larger, for example with \(B=N^2/8\):</p>
 
 <table>
   <tbody>
@@ -219,13 +231,13 @@ fn distinct_random_numbers(N: usize, B: usize) -&gt; Vec&lt;usize&gt; {
   </tbody>
 </table>
 
-<p>I’m not sure why this is happening, and it’s a bit unsettling. I fear there might be an error in the code, but I haven’t been able to identify it. If you spot any issues, please feel free to email me. Perhaps the Rust compiler is simply working harder to optimize, which could explain the increased compilation time. Honestly, I don’t know.</p>
+<p>I’m not sure why this is happening, and it’s a bit unsettling. I fill like rust killed C++ a little more than I wanted. I fear there might be an error in the code, but I haven’t been able to identify it. If you spot any issues, please feel free open an <a href="https://github.com/Julien5/sandbox/issues">issue</a> on github. Perhaps the Rust compiler is simply working harder to optimize, which could explain the increased compilation time. Honestly, I don’t know.</p>
 
-<p>At this point I could call it a day and move on, but I was caught and wanted to make my minesweeper code faster with multithreading. <a href="https://doc.rust-lang.org/book/ch16-00-concurrency.html">Fearless Concurrency</a> is a big selling point of rust.</p>
+<p>At this point I could call it a day and move on, but I was caught and wanted to make my minesweeper code  multithreaded. <a href="https://doc.rust-lang.org/book/ch16-00-concurrency.html">Fearless Concurrency</a> is a big selling point of rust.</p>
 
 <h2 id="grid-with-margin">Grid With Margin</h2>
 
-<p>As a first step to a concurrent algorithm, I pad the grid with margins.</p>
+<p>As a first step toward a concurrent algorithm, I pad the grid with margins.</p>
 
 <table>
   <thead>
@@ -240,7 +252,7 @@ fn distinct_random_numbers(N: usize, B: usize) -&gt; Vec&lt;usize&gt; {
   </tbody>
 </table>
 
-<p>This will allow us, in the second step, to divide the grid into multiple subgrids that can be process independantly without loosing neighboors counts. By doing so, we avoid the need for mutexes, and as a bonus we can eliminate a couple of <code class="language-plaintext highlighter-rouge">ifs</code>. This alone  makes the code faster (in both rust and C++). Before leaving C++ behind, lets look at the performance with the margin algorithm.</p>
+<p>This will allow us, in the second step, to divide the grid into multiple subgrids that can be process independantly without loosing neighboors counts. And as a bonus we can eliminate bound checking. This alone  makes the code faster (in both rust and C++). Before leaving C++ behind, lets look at the performance gain we get by eliminating bound checking:</p>
 
 <p><strong>Many bombs:</strong></p>
 
@@ -358,10 +370,6 @@ fn main(X:usize,Y:usize,Bchunk:usize,K:usize,quiet:bool) {
 
 <h2 id="notes">Notes</h2>
 
-<h3 id="where-is-the-code-">Where is the code ?</h3>
-
-<p>The C++ code is <a href="https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/C/">here</a>, the rust code is <a href="https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/">here</a>. The script that produces the picture is <a href="https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/measure/main.sh">here</a>.</p>
-
 <h3 id="statistical-cost-of-chunking">Statistical Cost Of Chunking</h3>
 
-<p>Generating bomb per tile has a “statistical” cost: the probability of the bomb distribution is not uniform over the large grid anymore. For example the probability of any chunk to have more (or less) than \(B/K\) bombs is zero. At this price we reduce the space complexity.</p>]]></content><author><name></name></author><category term="minesweeper" /><summary type="html"><![CDATA[In his essay On Writing, Stephen King advises writers to begin with a “situation” rather than a fully fleshed-out plot. The idea is to take a simple scenario, like a woman alone in her house with her ex-husband circling outside in the dark, and then “unpack” it to see where the story leads. At first glance, programming might seem worlds away from such tension-filled moments. Yet, if you look beneath the surface, you’ll find a different kind of narrative at play. As Pieter Hintjens points out in his excellent The Guide, the world of software development is shaped by very human forces: stupidity, selfishness, jealousy, and fear. In my case, jealousy is at work and and this blog post is about trying to outdo my coworkers on a small coding challenge we use in interviews. A couple of years ago, each team members gave its best on the coding challenge and my implementation was not the fastest. It was the one with the lower memory usage, if I remember well, but it was slow. Now my goal: take the fastest C++ code the team produced, re-implement the same algorithm using my (very modest) beginner Rust skills, and see if I can beat C++. I am the husband and I have a rusty knife in the hand.]]></summary></entry></feed>
+<p>Generating bomb per tile has a “statistical” cost: the probability of the bomb distribution is not uniform over the large grid anymore. For example the probability of any chunk to have more (or less) than \(B/K\) bombs is zero. At this price we reduce the space complexity.</p>]]></content><author><name></name></author><category term="minesweeper" /><summary type="html"><![CDATA[In his essay On Writing, Stephen King advises aspiring writers to begin with a “situation” rather than a fully fleshed-out plot. The idea is to take a simple scenario, like a woman alone in her house with her ex-husband circling outside in the dark, and then “unpack” it to see where the story leads. At first glance, programming might seem worlds away from such tension-filled moments. Yet, if you look beneath the surface, you’ll find a different kind of narrative at play. As Pieter Hintjens points out in his excellent The Guide, the world of software development is shaped by dark forces: stupidity, selfishness, jealousy, and fear. In my case, jealousy is at work.]]></summary></entry></feed>
