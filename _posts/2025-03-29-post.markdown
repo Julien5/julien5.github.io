@@ -113,13 +113,14 @@ fn distinct_random_numbers(N: usize, B: usize) -> Vec<usize> {
 
 Assuming $$B<\frac{N^2}{2}$$, it is faster to run over bomb positions than to run over bomb-free positions:
 ```
-pub fn main(n : usize, b: usize, quiet: bool) {
-	let mut grid : Vec<usize> = vec![ZERO; n*n];
-	let Bx = distinct_random_numbers(...);
-	for p in &Bx {
-		grid[*p]=BOMB;
-		increment_neighbors(&mut grid,n,*p);
-	}
+pub fn main(N: usize, B: usize, quiet: bool) {
+    let mut grid: Vec<usize> = vec![ZERO; N * N];
+    let Bx = distinct_random_numbers(N * N, B);
+    for p in &Bx {
+        grid[*p] = BOMB;
+        increment_neighbors(&mut grid, N, *p);
+    }
+	...
 ```
 The grid array has length $$N\times N$$, and we must take care of the edges when iterating over the neighbors positions. 
 ```
