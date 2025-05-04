@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Minesweeper"
+title:  "Killing C++ With A Rusty Knife"
 date:   2025-03-29 08:28:19 +0100
 categories: minesweeper
 ---
