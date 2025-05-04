@@ -61,7 +61,7 @@ pub fn main(N : usize, B: usize, quiet: bool) {
   let Bx = distinct_random_numbers(N * N, B);
   for p in &Bx {
     grid[*p]=BOMB;
-    increment_neighboors(&mut grid,N,*p);
+    increment_neighbors(&mut grid,N,*p);
   }
   // printing without showing the counts
   print_grid(&grid,N,&mut printer, false);
@@ -124,7 +124,7 @@ pub fn main(N: usize, B: usize, quiet: bool) {
 ```
 The grid array has length $$N\times N$$, and we must take care of the edges when iterating over the neighbors positions. 
 ```
-fn increment_neighboors(grid: &mut [usize], _N: usize, pos: usize) {
+fn increment_neighbors(grid: &mut [usize], _N: usize, pos: usize) {
   let (posxu, posyu) = to_2d(pos, _N);
   let N = _N as isize;
   let (posx, posy) = (posxu as isize, posyu as isize);
@@ -234,7 +234,7 @@ As a first step toward a concurrent algorithm, I pad the grid with margins.
 |:----------------------------------------:|
 | Grid padded with margins                 |
 
-This will allow us, in the second step, to divide the grid into multiple subgrids that can be process independantly without loosing neighboors counts. And as a bonus we can eliminate bound checking. This alone  makes the code faster (in both Rust and C++). Before leaving C++ behind, lets look at the performance gain we get by eliminating bound checking when counting the bombs.
+This will allow us, in the second step, to divide the grid into multiple subgrids that can be process independantly without loosing neighbors counts. And as a bonus we can eliminate bound checking. This alone  makes the code faster (in both Rust and C++). Before leaving C++ behind, lets look at the performance gain we get by eliminating bound checking when counting the bombs.
 
 **Many bombs:**
 
