@@ -6,18 +6,20 @@ categories: minesweeper
 ---
 
 In his essay [*On Writing*](https://en.wikipedia.org/wiki/On_Writing:_A_Memoir_of_the_Craft), Stephen King advises aspiring writers to begin with a "situation" rather than a fully fleshed-out plot. The idea is to take a simple scenario, like a woman alone in her house with her ex-husband circling outside in the dark, and then "unpack" it to see where the story leads. 
-At first glance, programming might seem worlds away from such tension-filled moments. 
-Yet, if you look beneath the surface, you'll find a different kind of narrative at play. 
-As [Pieter Hintjens](https://en.wikipedia.org/wiki/Pieter_Hintjens) points out in his excellent [*The Guide*](https://zguide.zeromq.org/), the world of software development is shaped by dark forces: [stupidity, selfishness, jealousy, and fear](https://zguide.zeromq.org/docs/chapter6/#Psychology-of-Software-Architecture). In my case, jealousy is at work.
 
+At first glance, the world of programming and software development seems disconnected from such scenarios. However, if you look beneath the smooth and flat technological surface, it is shaped by very human forces. As [Pieter Hintjens](https://en.wikipedia.org/wiki/Pieter_Hintjens) points out in his excellent [*The Guide*](https://zguide.zeromq.org/), the world of software development is strongly shaped by psychological elements such [stupidity, selfishness, jealousy, and fear](https://zguide.zeromq.org/docs/chapter6/#Psychology-of-Software-Architecture). 
 
-A couple of years ago, each team members gave its best on a small coding challenge we use in interviews. My implementation was not the fastest. Maybe it was the slowest, maybe not, I don't remember. It was the one with the lower memory usage, but it was slow. This blog post is about trying to fix that. I'm going to take the fastest C++ code the team produced, re-implement the same algorithm using my (very modest) beginner Rust skills, and see if that beats C++. I am the husband and I have a rusty knife in the hand.
+A couple of years ago, our team selected a small coding challenge for job candidates. Each team member gave their best effort on that challenge, and unfortunately, my implementation wasn't the fastest. It might have been the slowest --- I don't quite remember. What I do recall is that it had the lowest memory usage, but it was slow. This blog post is about trying to fix that. I'm going to take the fastest C++ code our team produced, re-implement the same algorithm using my (very modest) beginner Rust skills, and see if that beats C++.
 
-## Minesweeper
+So, definitely, jealousy is at play here. I'm the husband, and I have a rusty knife in hand.
+
+## The Coding Challenge
 
 For those who don't remember what [minesweeper](https://en.wikipedia.org/wiki/Minesweeper_(video_game)) is, an image may be better than a thousand words: 
 
-![image](/assets/minesweeper/kmines.png)
+| ![image](/assets/minesweeper/kmines.png) |
+|:----------------------------------------:|
+| (image copied from wikipedia)            |
 
 The problem is given to the candidates as follows:
 ```
@@ -47,9 +49,9 @@ $ ./minesweeper 5 2
 ```
 This is just about **generating** a $$N\times N$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is **not** about programming a playable game or solving it. Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs).  As a Rust beginner, it took me well over an hour to get a working prototype.
 
-## Baseline rust version
+## Baseline Rust version
 
-The fastest C++ implementation among our team's C++ solutions is based on an array of length $$N\times N=N^2$$ representing the minesweeper grid, and an array of length $$B$$ with the bomb positions. I follow the same approach for the rust implementation. My initial rust version has an array with `usize` elements. The reason for `usize` is the lookup performed in [`print_grid`](#printing-the-grid), but the element type `usize` is quite large (8 bytes on my PC). In later versions, I switched to `Vec<u8>` for better memory efficiency. The main function:
+The fastest C++ implementation among our team's C++ solutions is based on an array of length $$N\times N=N^2$$ representing the minesweeper grid, and an array of length $$B$$ with the bomb positions. I follow the same approach for the Rust implementation. My initial Rust version has an array with `usize` elements. The reason for `usize` is the lookup performed in [`print_grid`](#printing-the-grid), but the element type `usize` is quite large (8 bytes on my PC). In later versions, I switched to `Vec<u8>` for better memory efficiency. The main function:
 ```
 const BOMB  : usize = 9;
 const ZERO  : usize = 0;
@@ -171,7 +173,7 @@ fn print_grid(grid:&[usize], n:usize, printer : &mut utils::Printer, show_count:
 	}
 }
 ```
-The complete code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline.rs). I could not help to make the output more readable with "|" as separators, even if that is a bit slower:
+The complete code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline.rs). I couldn't resist making the output more readable by using '|' as separators, even if that is a bit slower:
 ```
 [julien@Z230] minesweeper $ cargo run -- baseline verbose 4 4
 [...]
@@ -186,13 +188,13 @@ The complete code is [here](https://github.com/Julien5/sandbox/blob/master/test/
 | 1 | * | 2 | 1 |
 ```
 
-The C++ code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/C/), the rust code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/). The script that measure performance and produces the picture shown below is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/measure/main.sh).
+The C++ code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/C/), the Rust code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/). The script that measure performance and produces the picture shown below is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/measure/main.sh).
 
 ## Performance 
 
-**Is rust faster?** It is faster. 
+**Is Rust faster?** It is faster. 
 
-Well, no, we have to build the code first and rust is not faster.
+Well, no, we have to build the code first and Rust is not faster.
 
 |      | version      | build flags             | build time          |
 |------|--------------|-------------------------|---------------------|
@@ -215,9 +217,9 @@ The performance delta gets even larger, for example with $$B=N^2/8$$:
 
 | ![tile](/assets/minesweeper/time-array-baseline-8.png) |
 
-I'm not sure why this is happening, and it's a bit unsettling. I fill like rust killed C++ a little more than I wanted. I fear there might be an error in the code, but I haven't been able to identify it. If you spot any issues, please feel free open an [issue](https://github.com/Julien5/sandbox/issues) on github. Perhaps the Rust compiler is simply working harder to optimize, which could explain the increased compilation time. Honestly, I don't know.
+I'm not sure why this is happening, and it's a bit unsettling. I fill like Rust killed C++ a little more than I wanted. I fear there might be an error in the code, but I haven't been able to identify it. If you spot any issues, please feel free open an [issue](https://github.com/Julien5/sandbox/issues) on github. Perhaps the Rust compiler is simply working harder to optimize, which could explain the increased compilation time. Honestly, I don't know.
 
-At this point I could call it a day and move on, but I was caught and wanted to make my minesweeper code  multithreaded. [Fearless Concurrency](https://doc.rust-lang.org/book/ch16-00-concurrency.html) is a big selling point of rust. 
+At this point I could call it a day and move on, but I was caught and wanted to make my minesweeper code  multithreaded. [Fearless Concurrency](https://doc.rust-lang.org/book/ch16-00-concurrency.html) is a big selling point of Rust. 
 
 ## Grid With Margin
 
@@ -227,7 +229,7 @@ As a first step toward a concurrent algorithm, I pad the grid with margins.
 |:----------------------------------------:|
 | Grid padded with margins                 |
 
-This will allow us, in the second step, to divide the grid into multiple subgrids that can be process independantly without loosing neighboors counts. And as a bonus we can eliminate bound checking. This alone  makes the code faster (in both rust and C++). Before leaving C++ behind, lets look at the performance gain we get by eliminating bound checking:
+This will allow us, in the second step, to divide the grid into multiple subgrids that can be process independantly without loosing neighboors counts. And as a bonus we can eliminate bound checking. This alone  makes the code faster (in both Rust and C++). Before leaving C++ behind, lets look at the performance gain we get by eliminating bound checking:
 
 **Many bombs:**
 
@@ -237,7 +239,7 @@ This will allow us, in the second step, to divide the grid into multiple subgrid
 
 | ![tile](/assets/minesweeper/time-array-compare-8.png) |
 
-The speed gains in rust and C++ are similar. The C++-margin performance is close to the rust-baseline, striking. 
+The speed gains in Rust and C++ are similar. The C++-margin performance is close to the Rust-baseline, striking. 
 
 I checked that the baseline get similar timing to the margin algorithm if I [manipulate](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline-manipulated.rs) it so to remove bound checking (I constrained the bomb positions to avoid edges). Then the timings are similar to the margin version. 
 
