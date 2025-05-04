@@ -47,11 +47,11 @@ $ ./minesweeper 5 2
 .....
 .....
 ```
-This is just about **generating** a $$N\times N$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is **not** about programming a playable game or solving it. Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs).  As a Rust beginner, it took me well over an hour to get a working prototype.
+This is just about **generating** a $$N\times N$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is **not** about programming a playable game or solving it. Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs).  (As a Rust beginner, it took me well over an hour to get a working prototype). In this post I discuss algorithms and their Rust implementations. The complete code, including the C++ code used for comparison, is available [here](https://github.com/Julien5/sandbox/tree/master/test/rust/minesweeper).
 
 ## Baseline Rust version
 
-The fastest C++ implementation among our team's C++ solutions is based on an array of length $$N\times N=N^2$$ representing the minesweeper grid, and an array of length $$B$$ with the bomb positions. I follow the same approach for the Rust implementation. My initial Rust version has an array with `usize` elements. The reason for `usize` is the lookup performed in [`print_grid`](#printing-the-grid), but the element type `usize` is quite large (8 bytes on my PC). In later versions, I switched to `Vec<u8>` for better memory efficiency. The main function:
+The fastest C++ implementation among our team's C++ solutions is based on an array of length $$N\times N=N^2$$ representing the minesweeper grid, and an array of length $$B$$ with the bomb positions. I follow the same approach for the Rust implementation, which results in this main function:
 ```
 const BOMB  : usize = 9;
 const ZERO  : usize = 0;
@@ -69,6 +69,7 @@ pub fn main(N : usize, B: usize, quiet: bool) {
 	print_grid(&grid,N,&mut printer, true);
 }
 ```
+My initial Rust version has an array with `usize` elements. The reason for `usize` is the lookup performed in [`print_grid`](#printing-the-grid), but the element type `usize` is quite large (8 bytes on my PC). In later versions, I switched to `Vec<u8>` for better memory efficiency.
 
 ### Generating the bombs
 
@@ -81,7 +82,7 @@ For the $$B$$ randomly positioned bombs, the first idea that comes to mind is to
 ```
 That may be slow if $$B$$ is large... think of the extreme case where the grid is full of bombs. (There is a trick: if $$B>\frac{N^2}{2}$$ we can invert the logic and generate the bomb-free positions instead of bomb positions). 
 
-I wanted a fast, deterministic algorithm that prioritizes [time](https://en.wikipedia.org/wiki/Time_complexity) over [space](https://en.wikipedia.org/wiki/Space_complexity) complexity, and chose the Fisher–Yates shuffle. It makes $$B$$ *distincts* random numbers out of any $$B$$ random numbers, distincts or not. The trade-off is that it has $$O(N^2)$$ space complexity.
+I wanted a deterministic algorithm that prioritizes [time](https://en.wikipedia.org/wiki/Time_complexity) over [space](https://en.wikipedia.org/wiki/Space_complexity) complexity, and chose the Fisher–Yates shuffle. It makes $$B$$ *distincts* random numbers out of any $$B$$ random numbers, distincts or not. The trade-off is that it has $$O(N^2)$$ space complexity.
 
 ```
 // in utils.rs
@@ -110,14 +111,14 @@ fn distinct_random_numbers(N: usize, B: usize) -> Vec<usize> {
 
 ### Counting the bombs
 
-Assuming $$B<\frac{N^2}{2}$$, it is faster to run over bomb positions than to run over all bomb-free positions:
+Assuming $$B<\frac{N^2}{2}$$, it is faster to run over bomb positions than to run over bomb-free positions:
 ```
 pub fn main(n : usize, b: usize, quiet: bool) {
 	let mut grid : Vec<usize> = vec![ZERO; n*n];
 	let Bx = distinct_random_numbers(...);
 	for p in &Bx {
 		grid[*p]=BOMB;
-		increment_neighboors(&mut grid,n,*p);
+		increment_neighbors(&mut grid,n,*p);
 	}
 ```
 The grid element has length $$NxN$$, and we must take care of the edges when iterating over the neighbors positions. 
@@ -148,7 +149,7 @@ fn increment_neighboors(grid: &mut [usize], _N: usize, pos: usize) {
     }
 }
 ```
-Bound checking in the two dimensions costs us two `if`. I'll come back to that later.
+Bound checking in the two dimensions introduces two [conditional branches]((https://en.wikipedia.org/wiki/Branch_(computer_science))) ("`if`"), each incurring a performance penalty, which cost not negligible, as I will experiment later.
 
 ### Printing the grid
 
@@ -173,7 +174,8 @@ fn print_grid(grid:&[usize], n:usize, printer : &mut utils::Printer, show_count:
 	}
 }
 ```
-The complete code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline.rs). I couldn't resist making the output more readable by using '|' as separators, even if that is a bit slower:
+
+I couldn't resist making the output more readable by using '|' as separators, even if that is a bit slower:
 ```
 [julien@Z230] minesweeper $ cargo run -- baseline verbose 4 4
 [...]
@@ -188,20 +190,20 @@ The complete code is [here](https://github.com/Julien5/sandbox/blob/master/test/
 | 1 | * | 2 | 1 |
 ```
 
-The C++ code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/C/), the Rust code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/). The script that measure performance and produces the picture shown below is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/measure/main.sh).
+The baseline Rust code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline.rs). The C++ code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/C/).
 
 ## Performance 
 
+The measurements are done on a debian (bookworm) box with a i7-4470 CPU and 32 Gb RAM. The output of the processes under test is redirect to `/dev/null`. The script used to measure the performance and generate the graph is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/measure/main.sh).
+
 **Is Rust faster?** It is faster. 
 
-Well, no, we have to build the code first and Rust is not faster.
+Well, no, we have to build the code first and Rust is not faster at compiling.
 
 |      | version      | build flags             | build time          |
 |------|--------------|-------------------------|---------------------|
 | Rust | rustc 1.84.0 | `cargo build --release` | 1.7 s               |
 | C++  | gcc 12.2.0   | `g++ -O3 -DNDEBUG`      | 1.1 s  (`make -j8`) |
-
-The measurements are done on a debian (bookworm) box with a i7-4470 CPU and 32 Gb RAM. The output of the processes under test is redirect to `/dev/null`.
 
 **Many Bombs**
 
@@ -209,15 +211,17 @@ We populate every two position on the grid with a bomb ($$B=N^2/2$$). Here are t
 
 | ![tile](/assets/minesweeper/time-array-baseline-2.png) |
 
-Rust beats C++. Lets try again with less bombs.
+Rust outperforms C++. Lets try again with less bombs.
 
 **Less Bombs**
 
-The performance delta gets even larger, for example with $$B=N^2/8$$:
+Lets try with one bomb every eight position, $$B=N^2/8$$. I get the following results:
 
 | ![tile](/assets/minesweeper/time-array-baseline-8.png) |
 
-I'm not sure why this is happening, and it's a bit unsettling. I fill like Rust killed C++ a little more than I wanted. I fear there might be an error in the code, but I haven't been able to identify it. If you spot any issues, please feel free open an [issue](https://github.com/Julien5/sandbox/issues) on github. Perhaps the Rust compiler is simply working harder to optimize, which could explain the increased compilation time. Honestly, I don't know.
+The performance delta gets even larger. I'm not sure why this is happening, and it's a bit disturbing. I fill like Rust killed C++ a little more than I wanted. I fear there might be an error in the code, but I haven't been able to identify it. If you spot any issues, please feel free open an [issue](https://github.com/Julien5/sandbox/issues) on github. Perhaps the Rust compiler is simply working harder to optimize, which could explain the increased compilation time. Honestly, I don't know.
+
+
 
 At this point I could call it a day and move on, but I was caught and wanted to make my minesweeper code  multithreaded. [Fearless Concurrency](https://doc.rust-lang.org/book/ch16-00-concurrency.html) is a big selling point of Rust. 
 
@@ -229,7 +233,7 @@ As a first step toward a concurrent algorithm, I pad the grid with margins.
 |:----------------------------------------:|
 | Grid padded with margins                 |
 
-This will allow us, in the second step, to divide the grid into multiple subgrids that can be process independantly without loosing neighboors counts. And as a bonus we can eliminate bound checking. This alone  makes the code faster (in both Rust and C++). Before leaving C++ behind, lets look at the performance gain we get by eliminating bound checking:
+This will allow us, in the second step, to divide the grid into multiple subgrids that can be process independantly without loosing neighboors counts. And as a bonus we can eliminate bound checking. This alone  makes the code faster (in both Rust and C++). Before leaving C++ behind, lets look at the performance gain we get by eliminating bound checking when counting the bombs.
 
 **Many bombs:**
 
@@ -241,7 +245,7 @@ This will allow us, in the second step, to divide the grid into multiple subgrid
 
 The speed gains in Rust and C++ are similar. The C++-margin performance is close to the Rust-baseline, striking. 
 
-I checked that the baseline get similar timing to the margin algorithm if I [manipulate](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline-manipulated.rs) it so to remove bound checking (I constrained the bomb positions to avoid edges). Then the timings are similar to the margin version. 
+I verified that the baseline algorithm get similar timing to the margin algorithm if I [manipulate](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline_manipulated.rs) it so to remove bound checking (I constrained the bomb positions to avoid edges). Then the timings are similar to the margin version. 
 
 OK, now *good bye C++*.
 
@@ -258,11 +262,11 @@ If $$K$$ is the number of tiles, each tile has dimension $$(X+2) \times (Y+2)$$ 
 When merging the tiles for printing, we must take properly care of those edges (this is the `merge` function in [tile.rs](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/tile.rs)). This resulting algorithm is as follows:
 1. Determine $$K$$, the number of tiles. (This could be defined by the user.)
 2. For each k in $${0,...,K-1}$$:
-   - generate a chunk of $$B/K$$ bomb positions.
-   - for each bomb chunk, create one tile, place the bombs and increment neighbors counts.
+   - Generate an array of $$B/K$$ bomb positions. I call this bomb positions array a *bomb chunk* in the following.
+   - For each bomb chunk, create one tile, place the bombs and increment neighbors counts.
 3. Aggregate the $$K$$ tiles together and fix the counts on the tile edges.
 
-The loop at step 2 can be parallelized since the chunks and the tiles are indepedant from each other. Step 3 could be integrated in step 2, fixing the counts on the fly, immediately after the tiles have been produced. But this would require a mutex, and the [rayon](https://docs.rs/rayon/latest/rayon/) has an [issue](https://github.com/rayon-rs/rayon/issues/592) with using mutexes. 
+The loop at step 2 can be parallelized since the bomb chunks and the tiles are indepedant from each other. Step 3 could be integrated in step 2, fixing the counts on the fly, immediately after the tiles have been produced. But this would require a mutex, and the [rayon](https://docs.rs/rayon/latest/rayon/) has an [issue](https://github.com/rayon-rs/rayon/issues/592) with using mutexes. 
 
 Implementation with explicit for loops:
 ```
@@ -314,5 +318,5 @@ This behavior likely occurs because bomb generation is distributed over time. Fo
 
 ### Statistical Cost Of Chunking 
 
-Generating bomb per tile has a "statistical" cost: the probability of the bomb distribution is not uniform over the large grid anymore. For example the probability of any chunk to have more (or less) than $$B/K$$ bombs is zero. At this price we reduce the space complexity.
+Generating bomb per tile has a "statistical" cost: the probability of the bomb distribution is not uniform over the large grid anymore. For example the probability of any chunk to have more (or less) than $$B/K$$ bombs is zero. 
 
