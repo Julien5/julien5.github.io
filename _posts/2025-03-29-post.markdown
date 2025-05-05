@@ -250,7 +250,7 @@ I verified that the baseline algorithm get similar timing to the margin algorith
 
 OK, now *good bye C++*.
 
-## Going Parallel with Tiles
+## Parallelization
 
 The idea is very simple: divide the large minesweeper grids into multiple small rectangular tiles (subgrids), as shown here:
 
