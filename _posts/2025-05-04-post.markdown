@@ -1,0 +1,11 @@
+---
+layout: post
+title:  "C++ Strikes Back"
+date:   2025-05-04 16:31:03 +0200
+categories: random
+published: false
+---
+
+
+In my [previous post](https://julien5.github.io/minesweeper/2025/03/29/post.html), I compared Rust and C++.
+- with `export TEST=1` i generate the random numbers by foot and C++ gets faster

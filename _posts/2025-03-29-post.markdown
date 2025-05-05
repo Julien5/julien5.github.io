@@ -47,7 +47,7 @@ $ ./minesweeper 5 2
 .....
 .....
 ```
-This is just about **generating** a $$N\times N$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is **not** about programming a playable game or solving it. Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs).  (As a Rust beginner, it took me well over an hour to get a working prototype). In this post I discuss algorithms and their Rust implementations. The complete code, including the C++ code used for comparison, is available [here](https://github.com/Julien5/sandbox/tree/master/test/rust/minesweeper).
+This is just about **generating** a $$N\times N$$ square grid with $$B$$ randomly positioned bombs and count the bombs. This is **not** about programming a playable game or solving it. Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. My first version is [here](https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs).  (As a Rust beginner, it took me well over an hour to get a working prototype). In this post I discuss algorithms and their Rust implementations. The complete code, including the C++ code used for comparison, is available [here](https://github.com/Julien5/sandbox/tree/post-1/test/rust/minesweeper).
 
 ## Baseline Rust version
 
@@ -191,11 +191,11 @@ I couldn't resist making the output more readable by using '|' as separators, ev
 | 1 | * | 2 | 1 |
 ```
 
-The baseline Rust code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline.rs). The C++ code is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/C/).
+The baseline Rust code is [here](https://github.com/Julien5/sandbox/blob/post-1/test/rust/minesweeper/src/baseline.rs). The C++ code is [here](https://github.com/Julien5/sandbox/blob/post-1/test/rust/minesweeper/C/).
 
 ## Performance 
 
-The measurements are done on a debian (bookworm) box with a i7-4470 CPU and 32 Gb RAM. The output of the processes under test is redirect to `/dev/null`. The script used to measure the performance and generate the graph is [here](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/measure/main.sh).
+The measurements are done on a debian (bookworm) box with a i7-4470 CPU and 32 Gb RAM. The output of the processes under test is redirect to `/dev/null`. The script used to measure the performance and generate the graph is [here](https://github.com/Julien5/sandbox/blob/post-1/test/rust/minesweeper/measure/main.sh).
 
 **Is Rust faster?** It is faster. 
 
@@ -246,7 +246,7 @@ This will allow us, in the second step, to divide the grid into multiple subgrid
 
 The speed gains in Rust and C++ are similar. The C++-margin performance is close to the Rust-baseline, striking. 
 
-I verified that the baseline algorithm get similar timing to the margin algorithm if I [manipulate](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline_manipulated.rs) it so to remove bound checking (I constrained the bomb positions to avoid edges). Then the timings are similar to the margin version. 
+I verified that the baseline algorithm get similar timing to the margin algorithm if I [manipulate](https://github.com/Julien5/sandbox/blob/post-1/test/rust/minesweeper/src/baseline_manipulated.rs) it so to remove bound checking (I constrained the bomb positions to avoid edges). Then the timings are similar to the margin version. 
 
 OK, now *good bye C++*.
 
@@ -260,7 +260,7 @@ The idea is very simple: divide the large minesweeper grids into multiple small 
 
 If $$K$$ is the number of tiles, each tile has dimension $$(X+2) \times (Y+2)$$ where $$X=N$$ and $$Y=N/K$$.
 
-When merging the tiles for printing, we must take properly care of those edges (this is the `merge` function in [tile.rs](https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/tile.rs)). This resulting algorithm is as follows:
+When merging the tiles for printing, we must take properly care of those edges (this is the `merge` function in [tile.rs](https://github.com/Julien5/sandbox/blob/post-1/test/rust/minesweeper/src/tile.rs)). This resulting algorithm is as follows:
 1. Determine $$K$$, the number of tiles. (This could be defined by the user.)
 2. For each k in $${0,...,K-1}$$:
    - Generate an array of $$B/K$$ bomb positions. I call this bomb positions array a *bomb chunk* in the following.

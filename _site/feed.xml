@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-05-04T09:40:37+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">Killing C++ With A Rusty Knife</title><link href="http://localhost:4000/minesweeper/2025/03/29/post.html" rel="alternate" type="text/html" title="Killing C++ With A Rusty Knife" /><published>2025-03-29T08:28:19+01:00</published><updated>2025-03-29T08:28:19+01:00</updated><id>http://localhost:4000/minesweeper/2025/03/29/post</id><content type="html" xml:base="http://localhost:4000/minesweeper/2025/03/29/post.html"><![CDATA[<p>In his essay <a href="https://en.wikipedia.org/wiki/On_Writing:_A_Memoir_of_the_Craft"><em>On Writing</em></a>, Stephen King advises aspiring writers to begin with a “situation” rather than a fully fleshed-out plot. The idea is to take a simple scenario, like a woman alone in her house with her ex-husband circling outside in the dark, and then “unpack” it to see where the story leads.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-05-05T06:29:16+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><entry><title type="html">Killing C++ With A Rusty Knife</title><link href="http://localhost:4000/minesweeper/2025/03/29/post.html" rel="alternate" type="text/html" title="Killing C++ With A Rusty Knife" /><published>2025-03-29T08:28:19+01:00</published><updated>2025-03-29T08:28:19+01:00</updated><id>http://localhost:4000/minesweeper/2025/03/29/post</id><content type="html" xml:base="http://localhost:4000/minesweeper/2025/03/29/post.html"><![CDATA[<p>In his essay <a href="https://en.wikipedia.org/wiki/On_Writing:_A_Memoir_of_the_Craft"><em>On Writing</em></a>, Stephen King advises aspiring writers to begin with a “situation” rather than a fully fleshed-out plot. The idea is to take a simple scenario, like a woman alone in her house with her ex-husband circling outside in the dark, and then “unpack” it to see where the story leads.</p>
 
 <p>At first glance, the world of programming and software development seems disconnected from such scenarios. However, if you look beneath the smooth and flat technological surface, it is shaped by very human forces. As <a href="https://en.wikipedia.org/wiki/Pieter_Hintjens">Pieter Hintjens</a> points out in his excellent <a href="https://zguide.zeromq.org/"><em>The Guide</em></a>, software development is strongly shaped by psychological elements such as <a href="https://zguide.zeromq.org/docs/chapter6/#Psychology-of-Software-Architecture">stupidity, selfishness, jealousy, and fear</a>.</p>
 
@@ -48,7 +48,7 @@ $ ./minesweeper 5 2
 .....
 .....
 </code></pre></div></div>
-<p>This is just about <strong>generating</strong> a \(N\times N\) square grid with \(B\) randomly positioned bombs and count the bombs. This is <strong>not</strong> about programming a playable game or solving it. Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. My first version is <a href="https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs">here</a>.  (As a Rust beginner, it took me well over an hour to get a working prototype). In this post I discuss algorithms and their Rust implementations. The complete code, including the C++ code used for comparison, is available <a href="https://github.com/Julien5/sandbox/tree/master/test/rust/minesweeper">here</a>.</p>
+<p>This is just about <strong>generating</strong> a \(N\times N\) square grid with \(B\) randomly positioned bombs and count the bombs. This is <strong>not</strong> about programming a playable game or solving it. Nothing very exciting about this exercise, but if you think of (very) large grids, it can get interesting. My first version is <a href="https://github.com/Julien5/sandbox/blob/ae61a93e049e00a3115cbebe63aea0640fe2a147/test/rust/minesweeper/src/main.rs">here</a>.  (As a Rust beginner, it took me well over an hour to get a working prototype). In this post I discuss algorithms and their Rust implementations. The complete code, including the C++ code used for comparison, is available <a href="https://github.com/Julien5/sandbox/tree/post-1/test/rust/minesweeper">here</a>.</p>
 
 <h2 id="baseline-rust-version">Baseline Rust version</h2>
 
@@ -185,11 +185,11 @@ fn distinct_random_numbers(N: usize, B: usize) -&gt; Vec&lt;usize&gt; {
 | 1 | * | 2 | 1 |
 </code></pre></div></div>
 
-<p>The baseline Rust code is <a href="https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline.rs">here</a>. The C++ code is <a href="https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/C/">here</a>.</p>
+<p>The baseline Rust code is <a href="https://github.com/Julien5/sandbox/blob/post-1/test/rust/minesweeper/src/baseline.rs">here</a>. The C++ code is <a href="https://github.com/Julien5/sandbox/blob/post-1/test/rust/minesweeper/C/">here</a>.</p>
 
 <h2 id="performance">Performance</h2>
 
-<p>The measurements are done on a debian (bookworm) box with a i7-4470 CPU and 32 Gb RAM. The output of the processes under test is redirect to <code class="language-plaintext highlighter-rouge">/dev/null</code>. The script used to measure the performance and generate the graph is <a href="https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/measure/main.sh">here</a>.</p>
+<p>The measurements are done on a debian (bookworm) box with a i7-4470 CPU and 32 Gb RAM. The output of the processes under test is redirect to <code class="language-plaintext highlighter-rouge">/dev/null</code>. The script used to measure the performance and generate the graph is <a href="https://github.com/Julien5/sandbox/blob/post-1/test/rust/minesweeper/measure/main.sh">here</a>.</p>
 
 <p><strong>Is Rust faster?</strong> It is faster.</p>
 
@@ -291,7 +291,7 @@ fn distinct_random_numbers(N: usize, B: usize) -&gt; Vec&lt;usize&gt; {
 
 <p>The speed gains in Rust and C++ are similar. The C++-margin performance is close to the Rust-baseline, striking.</p>
 
-<p>I verified that the baseline algorithm get similar timing to the margin algorithm if I <a href="https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/baseline_manipulated.rs">manipulate</a> it so to remove bound checking (I constrained the bomb positions to avoid edges). Then the timings are similar to the margin version.</p>
+<p>I verified that the baseline algorithm get similar timing to the margin algorithm if I <a href="https://github.com/Julien5/sandbox/blob/post-1/test/rust/minesweeper/src/baseline_manipulated.rs">manipulate</a> it so to remove bound checking (I constrained the bomb positions to avoid edges). Then the timings are similar to the margin version.</p>
 
 <p>OK, now <em>good bye C++</em>.</p>
 
@@ -314,7 +314,7 @@ fn distinct_random_numbers(N: usize, B: usize) -&gt; Vec&lt;usize&gt; {
 
 <p>If \(K\) is the number of tiles, each tile has dimension \((X+2) \times (Y+2)\) where \(X=N\) and \(Y=N/K\).</p>
 
-<p>When merging the tiles for printing, we must take properly care of those edges (this is the <code class="language-plaintext highlighter-rouge">merge</code> function in <a href="https://github.com/Julien5/sandbox/blob/master/test/rust/minesweeper/src/tile.rs">tile.rs</a>). This resulting algorithm is as follows:</p>
+<p>When merging the tiles for printing, we must take properly care of those edges (this is the <code class="language-plaintext highlighter-rouge">merge</code> function in <a href="https://github.com/Julien5/sandbox/blob/post-1/test/rust/minesweeper/src/tile.rs">tile.rs</a>). This resulting algorithm is as follows:</p>
 <ol>
   <li>Determine \(K\), the number of tiles. (This could be defined by the user.)</li>
   <li>For each k in \({0,...,K-1}\):
